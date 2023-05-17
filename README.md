@@ -1,4 +1,4 @@
-# df-ml-starter
+# Dataflow ML Starter Project
 
 ## Summary
 This repo contains a simple Beam RunInference project, which demonstrates how to run this Beam pipeline using DirectRunner to develop and test
