@@ -1,0 +1,10 @@
+gs://apache-beam-ml/datasets/openimage_50k_benchmark/1ec63d33df5e91fd.jpg
+gs://apache-beam-ml/datasets/openimage_50k_benchmark/1ec64bfcb2d515c9.jpg
+gs://apache-beam-ml/datasets/openimage_50k_benchmark/1ec67f239007cb18.jpg
+gs://apache-beam-ml/datasets/openimage_50k_benchmark/1ec6988f60e8e881.jpg
+gs://apache-beam-ml/datasets/openimage_50k_benchmark/1ec6bf3c1551224a.jpg
+gs://apache-beam-ml/datasets/openimage_50k_benchmark/1ec6c1055bae51f5.jpg
+gs://apache-beam-ml/datasets/openimage_50k_benchmark/1ec6c15d60358c85.jpg
+gs://apache-beam-ml/datasets/openimage_50k_benchmark/1ec6ca007effdd80.jpg
+gs://apache-beam-ml/datasets/openimage_50k_benchmark/1ec7096df9477315.jpg
+gs://apache-beam-ml/datasets/openimage_50k_benchmark/1ec70b2abe194c75.jpg
