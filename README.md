@@ -4,6 +4,8 @@
 This repo contains a simple Beam RunInference project, which demonstrates how to run this Beam pipeline using DirectRunner to develop and test
 and launch the production job using DataflowRunner on either CPUs or GPUs. It can be served as a boilerplate to create a new Dataflow ML project.
 
+**This is not an officially supported Google product**.
+
 ## Prerequisites
 
 * conda
