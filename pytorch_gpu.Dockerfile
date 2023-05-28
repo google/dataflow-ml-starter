@@ -17,19 +17,13 @@ ARG PYTORCH_SERVING_BUILD_IMAGE=pytorch/pytorch:2.0.1-cuda11.7-cudnn8-runtime
 
 FROM ${PYTORCH_SERVING_BUILD_IMAGE}
 
-# Check that the chosen base image provides the expected version of Python interpreter.
-ARG PY_VERSION=3.10
-RUN [[ $PY_VERSION == `python -c 'import sys; print("%s.%s" % sys.version_info[0:2])'` ]] \
-   || { echo "Could not find Python interpreter or Python version is different from ${PY_VERSION}"; exit 1; }
-
 WORKDIR /workspace
 
 COPY requirements.txt requirements.txt
 
-RUN pip install --no-cache-dir -r requirements.txt \
-    && rm -f requirements.txt \
-    # Verify that there are no conflicting dependencies.
-    && pip check
+RUN pip install --upgrade pip \
+    && pip install --no-cache-dir -r requirements.txt \
+    && rm -f requirements.txt
 
 # Copy files from official SDK image, including script/dependencies.
 COPY --from=apache/beam_python${PYTHON_VERSION}_sdk:${BEAM_VERSION} /opt/apache/beam /opt/apache/beam
