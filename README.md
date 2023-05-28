@@ -38,7 +38,6 @@ newgrp docker
 │   └── openimage_10.txt    <- A sample test data that contains the gcs file path for each image
 ├── pyproject.toml          <- The TOML format Python project configuration file
 ├── requirements.dev.txt    <- Packages for the development such as `pytest`
-├── requirements.txt        <- The auto-generated packages for the production environment
 ├── requirements.prod.txt   <- Packages for the production environment and produces `requirements.txt`
 ├── setup.py                <- Used in `python setup.py sdist` to create the multi-file python package
 ├── src                     <- Source code for use in this project
