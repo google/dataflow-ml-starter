@@ -31,6 +31,7 @@ newgrp docker
 ```
 .
 ├── LICENSE
+├── .env.template           <- A configuration template file to define environment-specific variables
 ├── Makefile                <- Makefile with commands and type `make` to get the command list
 ├── README.md               <- The top-level README for developers using this project
 ├── data                    <- Any data for local development and testing

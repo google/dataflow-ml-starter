@@ -84,8 +84,8 @@ run-direct: ## Run a local test with DirectRunner
 	--model_name $(MODEL_NAME)
 
 docker: ## Build a custom docker image and push it to Artifact Registry
-	@$(shell sed "s|\$${BEAM_VERSION}|$(BEAM_VERSION)|g; s|\$${PYTHON_VERSION}|$(PYTHON_VERSION)|g" tensor_rt.Dockerfile > Dockerfile)
-	docker build -t $(CUSTOM_CONTAINER_IMAGE) -f Dockerfile .
+	@$(shell sed "s|\$${BEAM_VERSION}|$(BEAM_VERSION)|g; s|\$${PYTHON_VERSION}|$(PYTHON_VERSION)|g" ${DOCKERFILE_TEMPLATE} > Dockerfile)
+	docker build --platform linux/amd64 -t $(CUSTOM_CONTAINER_IMAGE) -f Dockerfile .
 	docker push $(CUSTOM_CONTAINER_IMAGE)
 
 run-df-gpu: ## Run a Dataflow job using the custom container with GPUs
@@ -110,7 +110,7 @@ run-df-gpu: ## Run a Dataflow job using the custom container with GPUs
 	--model_state_dict_path  $(MODEL_STATE_DICT_PATH) \
 	--model_name $(MODEL_NAME)
 
-run-df-cpu: ## Run a Dataflow job with CPUs
+run-df-cpu: ## Run a Dataflow job with CPUs and without Custom Container
 	@$(shell sed "s|\$${BEAM_VERSION}|$(BEAM_VERSION)|g" requirements.txt > beam-output/requirements.txt)
 	@$(eval JOB_NAME := beam-ml-starter-cpu-$(shell date +%s)-$(shell echo $$$$))
 	time ./venv/bin/python3 -m src.run \
