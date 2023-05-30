@@ -16,6 +16,7 @@
 beam-temp-*
 beam-output/
 Dockerfile
+requirements.txt
 
 # sys
 .DS_Store
