@@ -16,7 +16,7 @@
 from enum import Enum
 
 # third party libraries
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, root_validator
 
 
 class ModelName(str, Enum):
@@ -25,16 +25,30 @@ class ModelName(str, Enum):
 
 
 class ModelConfig(BaseModel):
-    model_state_dict_path: str = Field(..., description="path that contains the torch model state directory")
-    model_class_name: ModelName = Field(..., description="Reference to the class definition of the model.")
+    model_state_dict_path: str = Field(None, description="path that contains the torch model state directory")
+    model_class_name: ModelName = Field(None, description="Reference to the class definition of the model.")
     model_params: dict = Field(
-        ...,
+        None,
         description="Parameters passed to the constructor of the model_class. "
         "These will be used to instantiate the model object in the RunInference API.",
     )
+    tf_model_uri: ModelName = Field(None, description="TF model uri from https://tfhub.dev/")
     device: str = Field("CPU", description="Device to be used on the Runner. Choices are (CPU, GPU)")
     min_batch_size: int = 10
     max_batch_size: int = 100
+
+    @root_validator
+    def validate_fields(cls, values):
+        v = values.get("model_state_dict_path")
+        if v and values.get("tf_model_uri"):
+            raise ValueError("Cannot specify both model_state_dict_path and tf_model_uri")
+        if v is None and values.get("tf_model_uri") is None:
+            raise ValueError("At least one of model_state_dict_path or tf_model_uri must be specified")
+        if v and values.get("model_class_name") is None:
+            raise ValueError("model_class_name must be specified when using model_state_dict_path")
+        if v and values.get("model_params") is None:
+            raise ValueError("model_params must be specified when using model_state_dict_path")
+        return values
 
 
 class SourceConfig(BaseModel):
