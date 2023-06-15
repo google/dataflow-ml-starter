@@ -32,7 +32,7 @@ class ModelConfig(BaseModel):
         description="Parameters passed to the constructor of the model_class. "
         "These will be used to instantiate the model object in the RunInference API.",
     )
-    tf_model_uri: ModelName = Field(None, description="TF model uri from https://tfhub.dev/")
+    tf_model_uri: str = Field(None, description="TF model uri from https://tfhub.dev/")
     device: str = Field("CPU", description="Device to be used on the Runner. Choices are (CPU, GPU)")
     min_batch_size: int = 10
     max_batch_size: int = 100

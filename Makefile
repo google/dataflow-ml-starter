@@ -36,6 +36,12 @@ export PRINT_HELP_PYSCRIPT
 
 PYTHON = python$(PYTHON_VERSION)
 
+ifndef TF_MODEL_URI
+	MODEL_ENV := "TORCH"
+else
+	MODEL_ENV := "TF"
+endif
+
 help: ## Print this help
 	@echo
 	@echo "  make targets:"
@@ -77,11 +83,18 @@ test: lint ## Run tests
 	@PYTHONPATH="./:./src" ./venv/bin/pytest -s -vv --cov-config=.coveragerc --cov-report html:htmlcov_v1 --cov-fail-under=50 tests/
 
 run-direct: ## Run a local test with DirectRunner
-	@time ./venv/bin/python3 -m src.run \
+ifeq ($(MODEL_ENV), TORCH)
+	time ./venv/bin/python3 -m src.run \
 	--input data/openimage_10.txt \
 	--output beam-output/beam_test_out.txt \
 	--model_state_dict_path $(MODEL_STATE_DICT_PATH) \
 	--model_name $(MODEL_NAME)
+else
+	time ./venv/bin/python3 -m src.run \
+	--input data/openimage_10.txt \
+	--output beam-output/beam_test_out.txt \
+	--tf_model_uri $(TF_MODEL_URI)
+endif
 
 docker: ## Build a custom docker image and push it to Artifact Registry
 	@$(shell sed "s|\$${BEAM_VERSION}|$(BEAM_VERSION)|g; s|\$${PYTHON_VERSION}|$(PYTHON_VERSION)|g" ${DOCKERFILE_TEMPLATE} > Dockerfile)

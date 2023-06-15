@@ -84,7 +84,10 @@ def filter_empty_lines(text: str) -> Iterator[str]:
 class PostProcessor(beam.DoFn):
     def process(self, element: Tuple[str, PredictionResult]) -> Iterable[str]:
         filename, prediction_result = element
-        prediction = torch.argmax(prediction_result.inference, dim=0)
+        if isinstance(prediction_result.inference, torch.Tensor):
+            prediction = torch.argmax(prediction_result.inference, dim=0)
+        else:
+            prediction = np.argmax(prediction_result.inference)
         yield filename + "," + str(prediction.item())
 
 
@@ -136,7 +139,7 @@ def build_pipeline(pipeline, source_config: SourceConfig, sink_config: SinkConfi
     # do the model inference and postprocessing
     predictions = (
         filename_value_pair
-        | "PyTorchRunInference" >> RunInference(model_handler)
+        | "RunInference" >> RunInference(model_handler)
         | "ProcessOutput" >> beam.ParDo(PostProcessor())
     )
 
