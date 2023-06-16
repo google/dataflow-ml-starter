@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-ARG TF_SERVING_BUILD_IMAGE=nvidia/cuda:11.8.0-cudnn8-runtime-ubuntu22.04
+ARG TF_SERVING_BUILD_IMAGE=nvcr.io/nvidia/tensorflow:23.05-tf2-py3
 
 FROM ${TF_SERVING_BUILD_IMAGE}
 
@@ -20,11 +20,8 @@ WORKDIR /workspace
 
 COPY requirements.txt requirements.txt
 
-RUN apt-get update \
-    && apt install python${PYTHON_VERSION} python${PYTHON_VERSION}-venv python3-venv python3-pip -y
-
 RUN pip install --upgrade pip \
-    && pip install --no-cache-dir -r requirements.txt \
+    && pip install --no-cache-dir --user -r requirements.txt \
     && rm -f requirements.txt
 
 # Copy files from official SDK image, including script/dependencies.

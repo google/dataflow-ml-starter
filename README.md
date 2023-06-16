@@ -63,10 +63,11 @@ cp .env.template .env
 ```
 Use your editor to fill in the information in the `.env` file.
 
-If you want to try other ML models under `gs://apache-beam-ml/models/`,
+If you want to try other pytorch models under `gs://apache-beam-ml/models/`,
 ```bash
 gsutil ls gs://apache-beam-ml/models/
 ```
+you need to edit `config.py` to add more model names.
 
 It is highly recommended to run through this guide once using `mobilenet_v2` for image classification.
 
@@ -89,6 +90,29 @@ $ make
      run-direct                Run a local test with DirectRunner
      test                      Run tests
 ```
+
+### Pipeline and `.env` Details
+
+This project contains a simple RunInference Beam pipeline,
+```
+Read the GCS file that contains image GCS paths (beam.io.ReadFromText) ->
+Pre-process the input image, run a Pytorch or Tensorflow image classification model, post-process the results -->
+Write all predictions back to the GCS output file
+```
+The input image data is created from the ImageNet images.
+
+The entire code flows in this way:
+
+* `.env` defines the environment variables such as Torch or TF models, model name, Dockerfile template, etc.
+* `Makefile` reads these environment variables from `.env` and based on the make targets, it can run tests, build docker images, run Dataflow jobs with CPUs or GPUs.
+* `run.py` is called by the`Makefile` targets to parse the input arguments and set `ModelConfig`, `SourceConfig`, and `SinkConfig` defined in `config.py`, then calls `build_pipeline` from `pipeline.py` to build the final Beam pipeline
+
+
+To customize the pipeline, modify `build_pipeline` in [pipeline.py](https://github.com/google/dataflow-ml-starter/blob/main/src/pipeline.py). It defines how to read the image data from TextIO, pre-process the images, score them, post-process the predictions,
+and at last save the results using TextIO.
+
+[config.py](https://github.com/google/dataflow-ml-starter/blob/main/src/config.py) contains a set of `pydantic` models to specify the configurations for sources, sinks, and models and validate them. Users can easily add more Pytorch classification models. [Here](https://github.com/apache/beam/tree/master/sdks/python/apache_beam/examples/inference) contains more examples.
+
 
 ### Step 2: Initialize a venv for your project
 ```bash
@@ -142,19 +166,6 @@ make run-df-gpu
 When using resnet101 to score 50k images, the job took ~1h and cost ~0.5$ with resnet101.
 For `mobilenet_v2`, it cost 0.05$ with ~1h.
 Note the cost and time depends on your job settings and the regions.
-
-## Pipeline Details
-
-This project contains a simple RunInference Beam pipeline,
-```
-Read the GCS file that contains image GCS paths (beam.io.ReadFromText) ->
-Pre-process the input image, run a Pytorch image classification model, post-process the results -->
-Write all predictions back to the GCS output file
-```
-To customize the pipeline, modify `build_pipeline` in [pipeline.py](https://github.com/liferoad/df-ml-starter/blob/main/src/pipeline.py).
-[config.py](https://github.com/liferoad/df-ml-starter/blob/main/src/config.py) contains a set of `pydantic` models
-to specify the configurations for sources, sinks, and models and validate them.
-Users can easily add more Pytorch classification models. [Here](https://github.com/apache/beam/tree/master/sdks/python/apache_beam/examples/inference) contains more examples.
 
 ## FAQ
 
