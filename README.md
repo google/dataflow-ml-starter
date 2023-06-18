@@ -91,7 +91,7 @@ $ make
      test                      Run tests
 ```
 
-### Pipeline and `.env` Details
+### Pipeline Details
 
 This project contains a simple RunInference Beam pipeline,
 ```
@@ -113,6 +113,55 @@ and at last save the results using TextIO.
 
 [config.py](https://github.com/google/dataflow-ml-starter/blob/main/src/config.py) contains a set of `pydantic` models to specify the configurations for sources, sinks, and models and validate them. Users can easily add more Pytorch classification models. [Here](https://github.com/apache/beam/tree/master/sdks/python/apache_beam/examples/inference) contains more examples.
 
+### `.env` Details
+
+Most of options are configured by the `.env` file.
+Below is one example to use the Pytorch `mobilenet_v2` model for image classification:
+```
+################################################################################
+### PYTHON SDK SETTINGS
+################################################################################
+PYTHON_VERSION=3.10
+BEAM_VERSION=2.48.0
+DOCKERFILE_TEMPLATE=pytorch_gpu.Dockerfile
+################################################################################
+### GCP SETTINGS
+################################################################################
+PROJECT_ID=apache-beam-testing
+REGION=us-central1
+DISK_SIZE_GB=50
+MACHINE_TYPE=n1-standard-2
+################################################################################
+### DATAFLOW JOB SETTINGS
+################################################################################
+STAGING_LOCATION=gs://temp-storage-for-perf-tests/loadtests
+TEMP_LOCATION=gs://temp-storage-for-perf-tests/loadtests
+CUSTOM_CONTAINER_IMAGE=us-docker.pkg.dev/apache-beam-testing/xqhu/pytorch_gpu:latest
+SERVICE_OPTIONS="worker_accelerator=type:nvidia-tesla-t4;count:1;install-nvidia-driver"
+################################################################################
+### DATAFLOW JOB MODEL SETTINGS
+################################################################################
+MODEL_STATE_DICT_PATH="gs://apache-beam-ml/models/torchvision.models.mobilenet_v2.pth"
+MODEL_NAME=mobilenet_v2
+################################################################################
+### DATAFLOW JOB INPUT&OUTPUT SETTINGS
+################################################################################
+INPUT_DATA="gs://apache-beam-ml/testing/inputs/openimage_50k_benchmark.txt"
+OUTPUT_DATA="gs://temp-storage-for-end-to-end-tests/torch/result_gpu_xqhu.txt"
+```
+Most of options are intuitive. `DOCKERFILE_TEMPLATE` provides the Dockerfile template that will be used to build the custom container. `CUSTOM_CONTAINER_IMAGE` is the Docker image storage location.
+In default, we use GPUs (i.e., T4) with the custom container defined by `SERVICE_OPTIONS` for this Dataflow job. `MODEL_STATE_DICT_PATH` and `MODEL_NAME` defines the Pytorch model information. For this Beam pipeline, we use the GCS buckets for input and output data.
+
+### Custom container
+We provide three Dockerfile templates when building a custom container:
+|Name|Description|
+|---|---|
+|tensor_rt.Dockerfile| TensorRT + Python 3.8|
+|pytorch_gpu.Dockerfile| Pytorch with GPUs + Python 3.10|
+|tensorflow_gpu.Dockerfile | Tensorflow with GPUs + Python 3.8|
+
+You should keep your local Python environment same as the one defined in Dockerfile.
+This example uses both Tensorflow and Pytorch. You might only choose one for your application.
 
 ### Step 2: Initialize a venv for your project
 ```bash

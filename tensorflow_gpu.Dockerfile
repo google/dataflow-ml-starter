@@ -12,17 +12,20 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-ARG TF_SERVING_BUILD_IMAGE=nvcr.io/nvidia/tensorflow:23.05-tf2-py3
+# This uses Ubuntu with Python 3.10
+ARG PYTORCH_SERVING_BUILD_IMAGE=tensorflow/tensorflow:latest-gpu
 
-FROM ${TF_SERVING_BUILD_IMAGE}
+FROM ${PYTORCH_SERVING_BUILD_IMAGE}
 
 WORKDIR /workspace
 
 COPY requirements.txt requirements.txt
 
 RUN pip install --upgrade pip \
-    && pip install --no-cache-dir --user -r requirements.txt \
+    && pip install --no-cache-dir -r requirements.txt \
     && rm -f requirements.txt
+
+ENV TF_FORCE_GPU_ALLOW_GROWTH true
 
 # Copy files from official SDK image, including script/dependencies.
 COPY --from=apache/beam_python${PYTHON_VERSION}_sdk:${BEAM_VERSION} /opt/apache/beam /opt/apache/beam

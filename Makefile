@@ -83,7 +83,7 @@ test: lint ## Run tests
 	@PYTHONPATH="./:./src" ./venv/bin/pytest -s -vv --cov-config=.coveragerc --cov-report html:htmlcov_v1 --cov-fail-under=50 tests/
 
 run-direct: ## Run a local test with DirectRunner
-ifeq ($(MODEL_ENV), TORCH)
+ifeq ($(MODEL_ENV), "TORCH")
 	time ./venv/bin/python3 -m src.run \
 	--input data/openimage_10.txt \
 	--output beam-output/beam_test_out.txt \
@@ -103,7 +103,7 @@ docker: ## Build a custom docker image and push it to Artifact Registry
 
 run-df-gpu: ## Run a Dataflow job using the custom container with GPUs
 	$(eval JOB_NAME := beam-ml-starter-gpu-$(shell date +%s)-$(shell echo $$$$))
-ifeq ($(MODEL_ENV), TORCH)
+ifeq ($(MODEL_ENV), "TORCH")
 	time ./venv/bin/python3 -m src.run \
 	--runner DataflowRunner \
 	--job_name $(JOB_NAME) \
@@ -147,7 +147,7 @@ endif
 run-df-cpu: ## Run a Dataflow job with CPUs and without Custom Container
 	@$(shell sed "s|\$${BEAM_VERSION}|$(BEAM_VERSION)|g" requirements.txt > beam-output/requirements.txt)
 	@$(eval JOB_NAME := beam-ml-starter-cpu-$(shell date +%s)-$(shell echo $$$$))
-ifeq ($(MODEL_ENV), TORCH)
+ifeq ($(MODEL_ENV), "TORCH")
 	time ./venv/bin/python3 -m src.run \
 	--runner DataflowRunner \
 	--job_name $(JOB_NAME) \
