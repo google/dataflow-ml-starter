@@ -114,7 +114,14 @@ def build_pipeline(pipeline, source_config: SourceConfig, sink_config: SinkConfi
             )
         )
     elif model_config.tf_model_uri:
-        model_handler = KeyedModelHandler(TFModelHandlerTensor(model_uri=model_config.tf_model_uri))
+        model_handler = KeyedModelHandler(
+            TFModelHandlerTensor(
+                model_uri=model_config.tf_model_uri,
+                device=model_config.device,
+                min_batch_size=model_config.min_batch_size,
+                max_batch_size=model_config.max_batch_size,
+            )
+        )
     else:
         raise ValueError("Only support PytorchModelHandler and TFModelHandlerTensor!")
 
