@@ -37,3 +37,14 @@ def test_build_pipeline():
 
     p = beam.Pipeline()
     build_pipeline(p, source_config=source_config, sink_config=sink_config, model_config=model_config)
+
+
+def test_build_pipeline_with_tf():
+    model_config = ModelConfig(
+        tf_model_uri="https://tfhub.dev/google/imagenet/mobilenet_v1_075_192/quantops/classification/3",
+    )
+    source_config = SourceConfig(input=str(DATA_FILE_PATH / "openimage_10.txt"))
+    sink_config = SinkConfig(output="beam-output/my_output.txt")
+
+    p = beam.Pipeline()
+    build_pipeline(p, source_config=source_config, sink_config=sink_config, model_config=model_config)

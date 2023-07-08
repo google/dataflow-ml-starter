@@ -63,10 +63,11 @@ cp .env.template .env
 ```
 Use your editor to fill in the information in the `.env` file.
 
-If you want to try other ML models under `gs://apache-beam-ml/models/`,
+If you want to try other pytorch models under `gs://apache-beam-ml/models/`,
 ```bash
 gsutil ls gs://apache-beam-ml/models/
 ```
+you need to edit `config.py` to add more model names.
 
 It is highly recommended to run through this guide once using `mobilenet_v2` for image classification.
 
@@ -89,6 +90,78 @@ $ make
      run-direct                Run a local test with DirectRunner
      test                      Run tests
 ```
+
+### Pipeline Details
+
+This project contains a simple RunInference Beam pipeline,
+```
+Read the GCS file that contains image GCS paths (beam.io.ReadFromText) ->
+Pre-process the input image, run a Pytorch or Tensorflow image classification model, post-process the results -->
+Write all predictions back to the GCS output file
+```
+The input image data is created from the ImageNet images.
+
+The entire code flows in this way:
+
+* `.env` defines the environment variables such as Torch or TF models, model name, Dockerfile template, etc.
+* `Makefile` reads these environment variables from `.env` and based on the make targets, it can run tests, build docker images, run Dataflow jobs with CPUs or GPUs.
+* `run.py` is called by the`Makefile` targets to parse the input arguments and set `ModelConfig`, `SourceConfig`, and `SinkConfig` defined in `config.py`, then calls `build_pipeline` from `pipeline.py` to build the final Beam pipeline
+
+
+To customize the pipeline, modify `build_pipeline` in [pipeline.py](https://github.com/google/dataflow-ml-starter/blob/main/src/pipeline.py). It defines how to read the image data from TextIO, pre-process the images, score them, post-process the predictions,
+and at last save the results using TextIO.
+
+[config.py](https://github.com/google/dataflow-ml-starter/blob/main/src/config.py) contains a set of `pydantic` models to specify the configurations for sources, sinks, and models and validate them. Users can easily add more Pytorch classification models. [Here](https://github.com/apache/beam/tree/master/sdks/python/apache_beam/examples/inference) contains more examples.
+
+### `.env` Details
+
+Most of options are configured by the `.env` file.
+Below is one example to use the Pytorch `mobilenet_v2` model for image classification:
+```
+################################################################################
+### PYTHON SDK SETTINGS
+################################################################################
+PYTHON_VERSION=3.10
+BEAM_VERSION=2.48.0
+DOCKERFILE_TEMPLATE=pytorch_gpu.Dockerfile
+################################################################################
+### GCP SETTINGS
+################################################################################
+PROJECT_ID=apache-beam-testing
+REGION=us-central1
+DISK_SIZE_GB=50
+MACHINE_TYPE=n1-standard-2
+################################################################################
+### DATAFLOW JOB SETTINGS
+################################################################################
+STAGING_LOCATION=gs://temp-storage-for-perf-tests/loadtests
+TEMP_LOCATION=gs://temp-storage-for-perf-tests/loadtests
+CUSTOM_CONTAINER_IMAGE=us-docker.pkg.dev/apache-beam-testing/xqhu/pytorch_gpu:latest
+SERVICE_OPTIONS="worker_accelerator=type:nvidia-tesla-t4;count:1;install-nvidia-driver"
+################################################################################
+### DATAFLOW JOB MODEL SETTINGS
+################################################################################
+MODEL_STATE_DICT_PATH="gs://apache-beam-ml/models/torchvision.models.mobilenet_v2.pth"
+MODEL_NAME=mobilenet_v2
+################################################################################
+### DATAFLOW JOB INPUT&OUTPUT SETTINGS
+################################################################################
+INPUT_DATA="gs://apache-beam-ml/testing/inputs/openimage_50k_benchmark.txt"
+OUTPUT_DATA="gs://temp-storage-for-end-to-end-tests/torch/result_gpu_xqhu.txt"
+```
+Most of options are intuitive. `DOCKERFILE_TEMPLATE` provides the Dockerfile template that will be used to build the custom container. `CUSTOM_CONTAINER_IMAGE` is the Docker image storage location.
+In default, we use GPUs (i.e., T4) with the custom container defined by `SERVICE_OPTIONS` for this Dataflow job. `MODEL_STATE_DICT_PATH` and `MODEL_NAME` defines the Pytorch model information. For this Beam pipeline, we use the GCS buckets for input and output data.
+
+### Custom container
+We provide three Dockerfile templates as examples to show how to build a custom container:
+|Name|Description|
+|---|---|
+|tensor_rt.Dockerfile| TensorRT + Python 3.8|
+|pytorch_gpu.Dockerfile| Pytorch with GPUs + Python 3.10|
+|tensorflow_gpu.Dockerfile | Tensorflow with GPUs + Python 3.8|
+
+Note You should keep your local Python environment same as the one defined in Dockerfile.
+These Dockerfile examples should be customized based on your project requirements.
 
 ### Step 2: Initialize a venv for your project
 ```bash
@@ -143,19 +216,6 @@ When using resnet101 to score 50k images, the job took ~1h and cost ~0.5$ with r
 For `mobilenet_v2`, it cost 0.05$ with ~1h.
 Note the cost and time depends on your job settings and the regions.
 
-## Pipeline Details
-
-This project contains a simple RunInference Beam pipeline,
-```
-Read the GCS file that contains image GCS paths (beam.io.ReadFromText) ->
-Pre-process the input image, run a Pytorch image classification model, post-process the results -->
-Write all predictions back to the GCS output file
-```
-To customize the pipeline, modify `build_pipeline` in [pipeline.py](https://github.com/liferoad/df-ml-starter/blob/main/src/pipeline.py).
-[config.py](https://github.com/liferoad/df-ml-starter/blob/main/src/config.py) contains a set of `pydantic` models
-to specify the configurations for sources, sinks, and models and validate them.
-Users can easily add more Pytorch classification models. [Here](https://github.com/apache/beam/tree/master/sdks/python/apache_beam/examples/inference) contains more examples.
-
 ## FAQ
 
 ### Permission error when using any GCP command
@@ -164,6 +224,8 @@ gcloud auth login
 gcloud auth application-default login
 # replace it with the appropriate region
 gcloud auth configure-docker us-docker.pkg.dev
+# or if you use docker-credential-gcr
+docker-credential-gcr configure-docker --registries=us-docker.pkg.dev
 ```
 Make sure you specify the appropriate region for Artifact Registry.
 
@@ -205,7 +267,7 @@ exec /opt/apache/beam/boot: no such file or directory
 
 ## Useful Links
 * https://cloud.google.com/dataflow/docs/guides/using-custom-containers#docker
-* https://cloud.google.com/dataflow/docs/guides/using-gpus#building_a_custom_container_image
+* https://cloud.google.com/dataflow/docs/gpu/use-gpus#custom-container
 * https://beam.apache.org/documentation/sdks/python-pipeline-dependencies/
 * https://github.com/apache/beam/blob/master/.test-infra/jenkins/job_InferenceBenchmarkTests_Python.groovy
-* https://cloud.google.com/dataflow/docs/guides/develop-with-gpus
+* https://cloud.google.com/dataflow/docs/gpu/troubleshoot-gpus#debug-vm

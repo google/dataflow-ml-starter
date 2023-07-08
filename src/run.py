@@ -35,9 +35,12 @@ def parse_known_args(argv):
         "--output", dest="output", required=True, help="Path where to save output predictions." " text file."
     )
     parser.add_argument(
-        "--model_state_dict_path", dest="model_state_dict_path", required=True, help="Path to the model's state_dict."
+        "--model_state_dict_path", dest="model_state_dict_path", required=False, help="Path to the model's state_dict."
     )
-    parser.add_argument("--model_name", dest="model_name", required=True, help="model name, e.g. resnet101")
+    parser.add_argument("--model_name", dest="model_name", required=False, help="model name, e.g. resnet101")
+    parser.add_argument(
+        "--tf_model_uri", dest="tf_model_uri", required=False, help="tfhub model URI from https://tfhub.dev/"
+    )
     parser.add_argument(
         "--images_dir",
         default=None,
@@ -73,6 +76,7 @@ def run(argv=None, save_main_session=True, test_pipeline=None) -> PipelineResult
         model_state_dict_path=known_args.model_state_dict_path,
         model_class_name=known_args.model_name,
         model_params={"num_classes": 1000},
+        tf_model_uri=known_args.tf_model_uri,
         device=known_args.device,
     )
 

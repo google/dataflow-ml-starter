@@ -36,6 +36,12 @@ export PRINT_HELP_PYSCRIPT
 
 PYTHON = python$(PYTHON_VERSION)
 
+ifndef TF_MODEL_URI
+	MODEL_ENV := "TORCH"
+else
+	MODEL_ENV := "TF"
+endif
+
 help: ## Print this help
 	@echo
 	@echo "  make targets:"
@@ -77,11 +83,18 @@ test: lint ## Run tests
 	@PYTHONPATH="./:./src" ./venv/bin/pytest -s -vv --cov-config=.coveragerc --cov-report html:htmlcov_v1 --cov-fail-under=50 tests/
 
 run-direct: ## Run a local test with DirectRunner
-	@time ./venv/bin/python3 -m src.run \
+ifeq ($(MODEL_ENV), "TORCH")
+	time ./venv/bin/python3 -m src.run \
 	--input data/openimage_10.txt \
 	--output beam-output/beam_test_out.txt \
 	--model_state_dict_path $(MODEL_STATE_DICT_PATH) \
 	--model_name $(MODEL_NAME)
+else
+	time ./venv/bin/python3 -m src.run \
+	--input data/openimage_10.txt \
+	--output beam-output/beam_test_out.txt \
+	--tf_model_uri $(TF_MODEL_URI)
+endif
 
 docker: ## Build a custom docker image and push it to Artifact Registry
 	@$(shell sed "s|\$${BEAM_VERSION}|$(BEAM_VERSION)|g; s|\$${PYTHON_VERSION}|$(PYTHON_VERSION)|g" ${DOCKERFILE_TEMPLATE} > Dockerfile)
@@ -90,6 +103,7 @@ docker: ## Build a custom docker image and push it to Artifact Registry
 
 run-df-gpu: ## Run a Dataflow job using the custom container with GPUs
 	$(eval JOB_NAME := beam-ml-starter-gpu-$(shell date +%s)-$(shell echo $$$$))
+ifeq ($(MODEL_ENV), "TORCH")
 	time ./venv/bin/python3 -m src.run \
 	--runner DataflowRunner \
 	--job_name $(JOB_NAME) \
@@ -109,10 +123,32 @@ run-df-gpu: ## Run a Dataflow job using the custom container with GPUs
 	--output $(OUTPUT_DATA) \
 	--model_state_dict_path  $(MODEL_STATE_DICT_PATH) \
 	--model_name $(MODEL_NAME)
+else
+	time ./venv/bin/python3 -m src.run \
+	--runner DataflowRunner \
+	--job_name $(JOB_NAME) \
+	--project $(PROJECT_ID) \
+	--region $(REGION) \
+	--machine_type $(MACHINE_TYPE) \
+	--disk_size_gb $(DISK_SIZE_GB) \
+	--staging_location $(STAGING_LOCATION) \
+	--temp_location $(TEMP_LOCATION) \
+	--setup_file ./setup.py \
+	--device GPU \
+	--dataflow_service_option $(SERVICE_OPTIONS) \
+	--number_of_worker_harness_threads 1 \
+	--experiments=disable_worker_container_image_prepull \
+	--sdk_container_image $(CUSTOM_CONTAINER_IMAGE) \
+	--sdk_location container \
+	--input $(INPUT_DATA) \
+	--output $(OUTPUT_DATA) \
+	--tf_model_uri $(TF_MODEL_URI)
+endif
 
 run-df-cpu: ## Run a Dataflow job with CPUs and without Custom Container
 	@$(shell sed "s|\$${BEAM_VERSION}|$(BEAM_VERSION)|g" requirements.txt > beam-output/requirements.txt)
 	@$(eval JOB_NAME := beam-ml-starter-cpu-$(shell date +%s)-$(shell echo $$$$))
+ifeq ($(MODEL_ENV), "TORCH")
 	time ./venv/bin/python3 -m src.run \
 	--runner DataflowRunner \
 	--job_name $(JOB_NAME) \
@@ -128,3 +164,19 @@ run-df-cpu: ## Run a Dataflow job with CPUs and without Custom Container
 	--output $(OUTPUT_DATA) \
 	--model_state_dict_path  $(MODEL_STATE_DICT_PATH) \
 	--model_name $(MODEL_NAME)
+else
+	time ./venv/bin/python3 -m src.run \
+	--runner DataflowRunner \
+	--job_name $(JOB_NAME) \
+	--project $(PROJECT_ID) \
+	--region $(REGION) \
+	--machine_type $(MACHINE_TYPE) \
+	--disk_size_gb $(DISK_SIZE_GB) \
+	--staging_location $(STAGING_LOCATION) \
+	--temp_location $(TEMP_LOCATION) \
+	--requirements_file requirements.txt \
+	--setup_file ./setup.py \
+	--input $(INPUT_DATA) \
+	--output $(OUTPUT_DATA) \
+	--tf_model_uri $(TF_MODEL_URI)
+endif
