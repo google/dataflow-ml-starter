@@ -153,15 +153,15 @@ Most of options are intuitive. `DOCKERFILE_TEMPLATE` provides the Dockerfile tem
 In default, we use GPUs (i.e., T4) with the custom container defined by `SERVICE_OPTIONS` for this Dataflow job. `MODEL_STATE_DICT_PATH` and `MODEL_NAME` defines the Pytorch model information. For this Beam pipeline, we use the GCS buckets for input and output data.
 
 ### Custom container
-We provide three Dockerfile templates when building a custom container:
+We provide three Dockerfile templates as examples to show how to build a custom container:
 |Name|Description|
 |---|---|
 |tensor_rt.Dockerfile| TensorRT + Python 3.8|
 |pytorch_gpu.Dockerfile| Pytorch with GPUs + Python 3.10|
 |tensorflow_gpu.Dockerfile | Tensorflow with GPUs + Python 3.8|
 
-You should keep your local Python environment same as the one defined in Dockerfile.
-This example uses both Tensorflow and Pytorch. You might only choose one for your application.
+Note You should keep your local Python environment same as the one defined in Dockerfile.
+These Dockerfile examples should be customized based on your project requirements.
 
 ### Step 2: Initialize a venv for your project
 ```bash
@@ -224,6 +224,8 @@ gcloud auth login
 gcloud auth application-default login
 # replace it with the appropriate region
 gcloud auth configure-docker us-docker.pkg.dev
+# or if you use docker-credential-gcr
+docker-credential-gcr configure-docker --registries=us-docker.pkg.dev
 ```
 Make sure you specify the appropriate region for Artifact Registry.
 
@@ -265,7 +267,7 @@ exec /opt/apache/beam/boot: no such file or directory
 
 ## Useful Links
 * https://cloud.google.com/dataflow/docs/guides/using-custom-containers#docker
-* https://cloud.google.com/dataflow/docs/guides/using-gpus#building_a_custom_container_image
+* https://cloud.google.com/dataflow/docs/gpu/use-gpus#custom-container
 * https://beam.apache.org/documentation/sdks/python-pipeline-dependencies/
 * https://github.com/apache/beam/blob/master/.test-infra/jenkins/job_InferenceBenchmarkTests_Python.groovy
-* https://cloud.google.com/dataflow/docs/guides/develop-with-gpus
+* https://cloud.google.com/dataflow/docs/gpu/troubleshoot-gpus#debug-vm

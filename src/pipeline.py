@@ -22,7 +22,6 @@ from typing import Iterable, Iterator, Optional, Tuple
 # third party libraries
 import apache_beam as beam
 import numpy as np
-import tensorflow as tf
 import torch
 import torch.nn as nn
 from apache_beam.io.filesystems import FileSystems
@@ -33,6 +32,8 @@ from PIL import Image
 from torchvision import models, transforms
 
 from .config import ModelConfig, ModelName, SinkConfig, SourceConfig
+
+import tensorflow as tf  # isort:skip
 
 
 def get_model_class(model_name: ModelName) -> nn.Module:
