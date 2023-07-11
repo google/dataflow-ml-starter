@@ -181,3 +181,7 @@ else
 	--output $(OUTPUT_DATA) \
 	--tf_model_uri $(TF_MODEL_URI)
 endif
+create-vm: ## Create a VM with GPU to test the docker image
+	@./scripts/create-gpu-vm.sh
+delete-vm: ## Delete a VM
+	gcloud compute instances delete $(VM_NAME) --project $(PROJECT_ID) --zone $(ZONE) --quiet
