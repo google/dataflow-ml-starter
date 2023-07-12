@@ -25,7 +25,7 @@ if [ -z "${CUSTOM_CONTAINER_IMAGE}" ]; then
 fi
 
 echo "Checking Tensorflow on GPU..."
-gcloud compute ssh $VM_NAME --project $PROJECT_ID --zone=$ZONE --quiet --command \
+gcloud compute ssh --strict-host-key-checking=no $VM_NAME --project $PROJECT_ID --zone=$ZONE --quiet --command \
 "docker run --entrypoint /bin/bash --volume /var/lib/nvidia/lib64:/usr/local/nvidia/lib64 \
   --volume /var/lib/nvidia/bin:/usr/local/nvidia/bin \
   --privileged $CUSTOM_CONTAINER_IMAGE -c \

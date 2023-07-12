@@ -221,16 +221,17 @@ It is highly recommended to test your custom container locally before running it
 ```bash
 make create-vm
 ```
-This creates a GCE VM with a T4 GPU and installs nvidia driver.
-This VM allows you to test whether the docker container is built correctly,
+This creates a GCE VM with a T4 GPU and installs nvidia driver. It will take a few minutes.
+Now using this VM allows you to test whether the docker container is built correctly,
 ```bash
-# check whether Beam is installed
+# check whether Beam is installed in Custom Container
 make check-beam
-# check whether Tensorflow can use GPUs
+# check whether Tensorflow can use GPUs in Custom Container
 make check-tf-gpu
-# check whether PyTorch can use GPUs
+# check whether PyTorch can use GPUs in Custom Container
 make check-torch-gpu
 ```
+Note these commands will take some time to download your container.
 You should see outputs similar to these:
 ```bash
 Checking Python version on VM...

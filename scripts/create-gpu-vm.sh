@@ -57,13 +57,15 @@ echo "VM IP address: $(gcloud compute instances describe $VM_NAME --project $PRO
 
 # Install GPU driver
 echo "Installing Nvidia GPU driver..."
-gcloud compute ssh $VM_NAME --project $PROJECT_ID --zone=$ZONE --quiet --command "cos-extensions install gpu && sudo mount --bind /var/lib/nvidia /var/lib/nvidia && sudo mount -o remount,exec /var/lib/nvidia"
+gcloud compute ssh --strict-host-key-checking=no $VM_NAME --project $PROJECT_ID --zone=$ZONE --tunnel-through-iap --quiet \
+--command "cos-extensions install gpu && sudo mount --bind /var/lib/nvidia /var/lib/nvidia && sudo mount -o remount,exec /var/lib/nvidia"
 echo "Getting the GPU driver information..."
-gcloud compute ssh $VM_NAME --project $PROJECT_ID --zone=$ZONE --quiet --command "/var/lib/nvidia/bin/nvidia-smi"
+gcloud compute ssh --strict-host-key-checking=no $VM_NAME --project $PROJECT_ID --zone=$ZONE --quiet --command "/var/lib/nvidia/bin/nvidia-smi"
 
 # docker-credential-gcr
 if [[ -n "$DOCKER_CREDENTIAL_REGISTRIES" ]]; then
     echo "HOME is defined."
     echo "Authenticating us-docker.pkg.dev..."
-    gcloud compute ssh $VM_NAME --project $PROJECT_ID --zone=$ZONE --quiet --command "docker-credential-gcr configure-docker --registries=$DOCKER_CREDENTIAL_REGISTRIES"
+    gcloud compute ssh --strict-host-key-checking=no $VM_NAME --project $PROJECT_ID --zone=$ZONE --quiet \
+    --command "docker-credential-gcr configure-docker --registries=$DOCKER_CREDENTIAL_REGISTRIES"
 fi
