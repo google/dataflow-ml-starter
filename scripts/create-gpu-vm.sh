@@ -29,7 +29,7 @@ GPU_COUNT=1
 GPU_TYPE="nvidia-tesla-t4"
 
 # Create the VM.
-echo "Waiting for VM to be created..."
+echo "Waiting for VM to be created (this will take a few minutes)..."
 
 gcloud compute instances create $VM_NAME \
   --project $PROJECT_ID \
@@ -54,3 +54,16 @@ echo "VM $VM_NAME is now running."
 
 # Print the VM's IP address.
 echo "VM IP address: $(gcloud compute instances describe $VM_NAME --project $PROJECT_ID --zone=$ZONE --format='value(networkInterfaces[0].accessConfigs[0].natIP)')"
+
+# Install GPU driver
+echo "Installing Nvidia GPU driver..."
+gcloud compute ssh $VM_NAME --project $PROJECT_ID --zone=$ZONE --quiet --command "cos-extensions install gpu && sudo mount --bind /var/lib/nvidia /var/lib/nvidia && sudo mount -o remount,exec /var/lib/nvidia"
+echo "Getting the GPU driver information..."
+gcloud compute ssh $VM_NAME --project $PROJECT_ID --zone=$ZONE --quiet --command "/var/lib/nvidia/bin/nvidia-smi"
+
+# docker-credential-gcr
+if [[ -n "$DOCKER_CREDENTIAL_REGISTRIES" ]]; then
+    echo "HOME is defined."
+    echo "Authenticating us-docker.pkg.dev..."
+    gcloud compute ssh $VM_NAME --project $PROJECT_ID --zone=$ZONE --quiet --command "docker-credential-gcr configure-docker --registries=$DOCKER_CREDENTIAL_REGISTRIES"
+fi

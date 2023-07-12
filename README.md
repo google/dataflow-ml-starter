@@ -124,6 +124,7 @@ Below is one example to use the Pytorch `mobilenet_v2` model for image classific
 PYTHON_VERSION=3.10
 BEAM_VERSION=2.48.0
 DOCKERFILE_TEMPLATE=pytorch_gpu.Dockerfile
+DOCKER_CREDENTIAL_REGISTRIES="us-docker.pkg.dev"
 ################################################################################
 ### GCP SETTINGS
 ################################################################################
@@ -131,6 +132,7 @@ PROJECT_ID=apache-beam-testing
 REGION=us-central1
 DISK_SIZE_GB=50
 MACHINE_TYPE=n1-standard-2
+VM_NAME=beam-ml-starter-gpu-1
 ################################################################################
 ### DATAFLOW JOB SETTINGS
 ################################################################################
@@ -199,6 +201,7 @@ When using resnet101 to score 50k images, the job took ~30m and cost ~1.4$ with 
 For `mobilenet_v2`, it cost 0.5$ with ~22m.
 Note the cost and time depends on your job settings and the regions.
 
+#### Build Custom Container with GPU supports
 Running Dataflow GPU jobs needs to build a custom container,
 ```bash
 make docker
@@ -206,8 +209,9 @@ make docker
 The final docker image will be pushed to Artifact Registry. For this guide,
 we use `tensor_rt.Dockerfile` to demonstrate how to build the container to run the inference on GPUs with TensorRT.
 **Note given the base image issue for TensorRT, only Python 3.8 should be used when running GPUs.**
-You can follow [this doc](https://cloud.google.com/dataflow/docs/guides/using-gpus) to create other GPU containers.
+You can follow [this doc](https://cloud.google.com/dataflow/docs/gpu/use-gpus#custom-container) to create other GPU containers.
 
+#### Run the Beam pipeline using DataflowRunner on GPUs
 This runs a Dataflow job with GPUs,
 ```bash
 make run-df-gpu
