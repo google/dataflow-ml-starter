@@ -39,6 +39,7 @@ newgrp docker
 ├── pyproject.toml          <- The TOML format Python project configuration file
 ├── requirements.dev.txt    <- Packages for the development such as `pytest`
 ├── requirements.prod.txt   <- Packages for the production environment and produces `requirements.txt`
+├── scripts                 <- utility bash scripts
 ├── setup.py                <- Used in `python setup.py sdist` to create the multi-file python package
 ├── src                     <- Source code for use in this project
 │   ├── __init__.py         <- Makes src a Python module
@@ -78,6 +79,7 @@ $ make
   make targets:
 
      check-beam                Check whether Beam is installed on GPU using VM with Custom Container
+     check-pipeline            Check whether the Beam pipeline can run on GPU using VM with Custom Container and DirectRunner
      check-tf-gpu              Check whether Tensorflow works on GPU using VM with Custom Container
      check-torch-gpu           Check whether PyTorch works on GPU using VM with Custom Container
      clean                     Remove virtual environment, downloaded models, etc
@@ -230,6 +232,8 @@ make check-beam
 make check-tf-gpu
 # check whether PyTorch can use GPUs in Custom Container
 make check-torch-gpu
+# check whether DirectRunner can run on GPUs in Custom Container
+make check-pipeline
 ```
 Note these commands will take some time to download your container.
 You should see outputs similar to these:
@@ -245,7 +249,10 @@ Checking Tensorflow on GPU...
 Checking PyTorch on GPU...
 True
 Tesla T4
+...
+The DirectRunner run succeeded on GPU!
 ```
+The last line will display whether the pipeline can run successfully on VM GPUs in Custom Container.
 
 After finishing tests, you can remove this VM,
 ```bash
