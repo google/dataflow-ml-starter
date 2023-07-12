@@ -185,9 +185,9 @@ create-vm: ## Create a VM with GPU to test the docker image
 	@./scripts/create-gpu-vm.sh
 delete-vm: ## Delete a VM
 	gcloud compute instances delete $(VM_NAME) --project $(PROJECT_ID) --zone $(ZONE) --quiet
-check-beam: ## Check whether Beam is installed on GPU using VM with the docker image
+check-beam: ## Check whether Beam is installed on GPU using VM with Custom Container
 	@./scripts/check-beam.sh
-check-tf-gpu: ## Check whether Tensforflow works on GPU using VM with the docker image
+check-tf-gpu: ## Check whether Tensorflow works on GPU using VM with Custom Container
 	@./scripts/check-tf-on-gpu.sh
-check-torch-gpu: ## Check whether PyTorch works on GPU using VM with the docker image
+check-torch-gpu: ## Check whether PyTorch works on GPU using VM with Custom Container
 	@./scripts/check-torch-on-gpu.sh

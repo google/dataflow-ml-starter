@@ -77,15 +77,20 @@ $ make
 
   make targets:
 
+     check-beam                Check whether Beam is installed on GPU using VM with Custom Container
+     check-tf-gpu              Check whether Tensorflow works on GPU using VM with Custom Container
+     check-torch-gpu           Check whether PyTorch works on GPU using VM with Custom Container
      clean                     Remove virtual environment, downloaded models, etc
      clean-lite                Remove pycache files, pytest files, etc
+     create-vm                 Create a VM with GPU to test the docker image
+     delete-vm                 Delete a VM
      docker                    Build a custom docker image and push it to Artifact Registry
      format                    Run formatter on source code
      help                      Print this help
      init                      Init virtual environment
      init-venv                 Create virtual environment in venv folder
      lint                      Run linter on source code
-     run-df-cpu                Run a Dataflow job with CPUs
+     run-df-cpu                Run a Dataflow job with CPUs and without Custom Container
      run-df-gpu                Run a Dataflow job using the custom container with GPUs
      run-direct                Run a local test with DirectRunner
      test                      Run tests
@@ -210,6 +215,41 @@ The final docker image will be pushed to Artifact Registry. For this guide,
 we use `tensor_rt.Dockerfile` to demonstrate how to build the container to run the inference on GPUs with TensorRT.
 **Note given the base image issue for TensorRT, only Python 3.8 should be used when running GPUs.**
 You can follow [this doc](https://cloud.google.com/dataflow/docs/gpu/use-gpus#custom-container) to create other GPU containers.
+
+#### Test Custom Container using GCE VM
+It is highly recommended to test your custom container locally before running it with Dataflow,
+```bash
+make create-vm
+```
+This creates a GCE VM with a T4 GPU and installs nvidia driver.
+This VM allows you to test whether the docker container is built correctly,
+```bash
+# check whether Beam is installed
+make check-beam
+# check whether Tensorflow can use GPUs
+make check-tf-gpu
+# check whether PyTorch can use GPUs
+make check-torch-gpu
+```
+You should see outputs similar to these:
+```bash
+Checking Python version on VM...
+Python 3.8.10
+Checking venv exists on VM...
+python3-venv/now 3.8.2-0ubuntu2 amd64 [installed,local]
+Checking Beam Version on VM...
+2.48.0
+Checking Tensorflow on GPU...
+[PhysicalDevice(name='/physical_device:CPU:0', device_type='CPU'), PhysicalDevice(name='/physical_device:GPU:0', device_type='GPU')]
+Checking PyTorch on GPU...
+True
+Tesla T4
+```
+
+After finishing tests, you can remove this VM,
+```bash
+make delete-vm
+```
 
 #### Run the Beam pipeline using DataflowRunner on GPUs
 This runs a Dataflow job with GPUs,
