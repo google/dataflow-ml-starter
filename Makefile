@@ -181,3 +181,21 @@ else
 	--output $(OUTPUT_DATA) \
 	--tf_model_uri $(TF_MODEL_URI)
 endif
+
+create-vm: ## Create a VM with GPU to test the docker image
+	@./scripts/create-gpu-vm.sh
+
+delete-vm: ## Delete a VM
+	gcloud compute instances delete $(VM_NAME) --project $(PROJECT_ID) --zone $(ZONE) --quiet
+
+check-beam: ## Check whether Beam is installed on GPU using VM with Custom Container
+	@./scripts/check-beam.sh
+
+check-tf-gpu: ## Check whether Tensorflow works on GPU using VM with Custom Container
+	@./scripts/check-tf-on-gpu.sh
+
+check-torch-gpu: ## Check whether PyTorch works on GPU using VM with Custom Container
+	@./scripts/check-torch-on-gpu.sh
+
+check-pipeline: ## Check whether the Beam pipeline can run on GPU using VM with Custom Container and DirectRunner
+	@./scripts/check-pipeline.sh

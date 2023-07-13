@@ -39,6 +39,7 @@ newgrp docker
 ├── pyproject.toml          <- The TOML format Python project configuration file
 ├── requirements.dev.txt    <- Packages for the development such as `pytest`
 ├── requirements.prod.txt   <- Packages for the production environment and produces `requirements.txt`
+├── scripts                 <- utility bash scripts
 ├── setup.py                <- Used in `python setup.py sdist` to create the multi-file python package
 ├── src                     <- Source code for use in this project
 │   ├── __init__.py         <- Makes src a Python module
@@ -77,15 +78,21 @@ $ make
 
   make targets:
 
+     check-beam                Check whether Beam is installed on GPU using VM with Custom Container
+     check-pipeline            Check whether the Beam pipeline can run on GPU using VM with Custom Container and DirectRunner
+     check-tf-gpu              Check whether Tensorflow works on GPU using VM with Custom Container
+     check-torch-gpu           Check whether PyTorch works on GPU using VM with Custom Container
      clean                     Remove virtual environment, downloaded models, etc
      clean-lite                Remove pycache files, pytest files, etc
+     create-vm                 Create a VM with GPU to test the docker image
+     delete-vm                 Delete a VM
      docker                    Build a custom docker image and push it to Artifact Registry
      format                    Run formatter on source code
      help                      Print this help
      init                      Init virtual environment
      init-venv                 Create virtual environment in venv folder
      lint                      Run linter on source code
-     run-df-cpu                Run a Dataflow job with CPUs
+     run-df-cpu                Run a Dataflow job with CPUs and without Custom Container
      run-df-gpu                Run a Dataflow job using the custom container with GPUs
      run-direct                Run a local test with DirectRunner
      test                      Run tests
@@ -124,6 +131,7 @@ Below is one example to use the Pytorch `mobilenet_v2` model for image classific
 PYTHON_VERSION=3.10
 BEAM_VERSION=2.48.0
 DOCKERFILE_TEMPLATE=pytorch_gpu.Dockerfile
+DOCKER_CREDENTIAL_REGISTRIES="us-docker.pkg.dev"
 ################################################################################
 ### GCP SETTINGS
 ################################################################################
@@ -131,6 +139,7 @@ PROJECT_ID=apache-beam-testing
 REGION=us-central1
 DISK_SIZE_GB=50
 MACHINE_TYPE=n1-standard-2
+VM_NAME=beam-ml-starter-gpu-1
 ################################################################################
 ### DATAFLOW JOB SETTINGS
 ################################################################################
@@ -199,6 +208,7 @@ When using resnet101 to score 50k images, the job took ~30m and cost ~1.4$ with 
 For `mobilenet_v2`, it cost 0.5$ with ~22m.
 Note the cost and time depends on your job settings and the regions.
 
+#### Build Custom Container with GPU supports
 Running Dataflow GPU jobs needs to build a custom container,
 ```bash
 make docker
@@ -206,8 +216,50 @@ make docker
 The final docker image will be pushed to Artifact Registry. For this guide,
 we use `tensor_rt.Dockerfile` to demonstrate how to build the container to run the inference on GPUs with TensorRT.
 **Note given the base image issue for TensorRT, only Python 3.8 should be used when running GPUs.**
-You can follow [this doc](https://cloud.google.com/dataflow/docs/guides/using-gpus) to create other GPU containers.
+You can follow [this doc](https://cloud.google.com/dataflow/docs/gpu/use-gpus#custom-container) to create other GPU containers.
 
+#### Test Custom Container using GCE VM
+It is highly recommended to test your custom container locally before running it with Dataflow,
+```bash
+make create-vm
+```
+This creates a GCE VM with a T4 GPU and installs nvidia driver. It will take a few minutes.
+Now using this VM allows you to test whether the docker container is built correctly,
+```bash
+# check whether Beam is installed in Custom Container
+make check-beam
+# check whether Tensorflow can use GPUs in Custom Container
+make check-tf-gpu
+# check whether PyTorch can use GPUs in Custom Container
+make check-torch-gpu
+# check whether DirectRunner can run on GPUs in Custom Container
+make check-pipeline
+```
+Note these commands will take some time to download your container.
+You should see outputs similar to these:
+```bash
+Checking Python version on VM...
+Python 3.8.10
+Checking venv exists on VM...
+python3-venv/now 3.8.2-0ubuntu2 amd64 [installed,local]
+Checking Beam Version on VM...
+2.48.0
+Checking Tensorflow on GPU...
+[PhysicalDevice(name='/physical_device:CPU:0', device_type='CPU'), PhysicalDevice(name='/physical_device:GPU:0', device_type='GPU')]
+Checking PyTorch on GPU...
+True
+Tesla T4
+...
+The DirectRunner run succeeded on GPU!
+```
+The last line will display whether the pipeline can run successfully on VM GPUs in Custom Container.
+
+After finishing tests, you can remove this VM,
+```bash
+make delete-vm
+```
+
+#### Run the Beam pipeline using DataflowRunner on GPUs
 This runs a Dataflow job with GPUs,
 ```bash
 make run-df-gpu
