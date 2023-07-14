@@ -1,0 +1,22 @@
+name: Run basic tests with Python 3.8
+
+on: [push, pull_request]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.8'
+      - name: Init env
+        run: |
+            cp tests/sample.env.tf .env
+            make init
+      - name: Run local tests
+        run: |
+            make test
