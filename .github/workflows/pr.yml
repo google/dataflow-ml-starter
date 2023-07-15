@@ -46,7 +46,7 @@ jobs:
         run: |
             # torch model
             sed -i '/TF_MODEL_URI=/d' .env
-            echo "MODEL_STATE_DICT_PATH='gs://apache-beam-ml/models/torchvision.models.mobilenet_v2.pth'" >> .env
+            echo "MODEL_STATE_DICT_PATH=gs://apache-beam-ml/models/torchvision.models.mobilenet_v2.pth" >> .env
             echo "MODEL_NAME=mobilenet_v2" >> .env
             make run-direct
             test -f beam-output/beam_test_out.txt && echo "DirectRunner ran successfully!" || $(error "Cannot find beam-output/beam_test_out.txt!")
