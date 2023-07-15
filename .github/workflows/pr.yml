@@ -20,7 +20,7 @@ name: Run basic tests with Python 3.8
 on: [push, pull_request]
 
 jobs:
-  build:
+  tests:
 
     runs-on: ubuntu-latest
 
@@ -42,7 +42,9 @@ jobs:
             # tf model
             make run-direct
             # torch model
-            echo "unset TF_MODEL_URI" >> .env
+            sed -i '' '/TF_MODEL_URI=/d' .env
             echo "MODEL_STATE_DICT_PATH='gs://apache-beam-ml/models/torchvision.models.mobilenet_v2.pth'" >> .env
             echo "MODEL_NAME=mobilenet_v2" >> .env
             make run-direct
+            # restore .env
+            cp tests/sample.env.tf .env

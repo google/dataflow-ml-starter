@@ -83,6 +83,7 @@ test: lint ## Run tests
 	@PYTHONPATH="./:./src" ./venv/bin/pytest -s -vv --cov-config=.coveragerc --cov-report html:htmlcov_v1 --cov-fail-under=50 tests/
 
 run-direct: ## Run a local test with DirectRunner
+	@rm -f beam-output/beam_test_out.txt
 ifeq ($(MODEL_ENV), "TORCH")
 	time ./venv/bin/python3 -m src.run \
 	--input data/openimage_10.txt \
@@ -94,6 +95,11 @@ else
 	--input data/openimage_10.txt \
 	--output beam-output/beam_test_out.txt \
 	--tf_model_uri $(TF_MODEL_URI)
+endif
+ifeq ($(wildcard beam-output/beam_test_out.txt),)
+	$(error File "beam-output/beam_test_out.txt" does not exist.)
+else
+	@echo "DirectRunner runs successfully!"
 endif
 
 docker: ## Build a custom docker image and push it to Artifact Registry
