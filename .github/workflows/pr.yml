@@ -37,10 +37,12 @@ jobs:
       - name: Run local tests
         run: |
             make test
-      - name: Run DirectRunner tests
+      - name: Run DirectRunner with TF
         run: |
             # tf model
             make run-direct
+      - name: Run DirectRunner with PyTorch
+        run: |
             # torch model
             sed -i '' '/TF_MODEL_URI=/d' .env
             echo "MODEL_STATE_DICT_PATH='gs://apache-beam-ml/models/torchvision.models.mobilenet_v2.pth'" >> .env
