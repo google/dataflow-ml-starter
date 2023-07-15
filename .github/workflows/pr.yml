@@ -45,7 +45,7 @@ jobs:
       - name: Run DirectRunner with PyTorch
         run: |
             # torch model
-            sed -i '' '/TF_MODEL_URI=/d' .env
+            sed -i '/TF_MODEL_URI=/d' .env
             echo "MODEL_STATE_DICT_PATH='gs://apache-beam-ml/models/torchvision.models.mobilenet_v2.pth'" >> .env
             echo "MODEL_NAME=mobilenet_v2" >> .env
             make run-direct
