@@ -96,11 +96,6 @@ else
 	--output beam-output/beam_test_out.txt \
 	--tf_model_uri $(TF_MODEL_URI)
 endif
-ifeq ($(wildcard beam-output/beam_test_out.txt),)
-	$(error File "beam-output/beam_test_out.txt" does not exist.)
-else
-	@echo "DirectRunner runs successfully!"
-endif
 
 docker: ## Build a custom docker image and push it to Artifact Registry
 	@$(shell sed "s|\$${BEAM_VERSION}|$(BEAM_VERSION)|g; s|\$${PYTHON_VERSION}|$(PYTHON_VERSION)|g" ${DOCKERFILE_TEMPLATE} > Dockerfile)
