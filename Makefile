@@ -80,7 +80,7 @@ clean: clean-lite ## Remove virtual environment, downloaded models, etc
 	@echo "run 'make init'"
 
 test: lint ## Run tests
-	@PYTHONPATH="./:./src" ./venv/bin/pytest -s -vv --cov-config=.coveragerc --cov-report html:htmlcov_v1 --cov-fail-under=50 tests/
+	@PYTHONPATH="./:./src" ./venv/bin/pytest -s -vv --cov=src --cov-fail-under=50 tests/
 
 run-direct: ## Run a local test with DirectRunner
 	@rm -f beam-output/beam_test_out.txt
