@@ -17,7 +17,7 @@
 
 name: Run basic tests with Python 3.8
 
-on: [push, pull_request]
+on: [push, pull_request, workflow_dispatch]
 
 jobs:
   tests:
