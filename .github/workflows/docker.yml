@@ -64,3 +64,6 @@ jobs:
       - name: Build and push Docker image
         run: |
           make docker
+      - name: Test Docker image
+        run: |
+            make run-df-gpu
