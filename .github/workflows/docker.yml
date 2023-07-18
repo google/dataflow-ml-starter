@@ -66,4 +66,4 @@ jobs:
           make docker
       - name: Test Docker image
         run: |
-            make run-df-gpu
+          make run-df-gpu
