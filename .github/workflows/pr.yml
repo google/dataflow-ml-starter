@@ -1,9 +1,23 @@
+#  Copyright 2023 Google LLC
+
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+
+#       https://www.apache.org/licenses/LICENSE-2.0
+
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+
 name: Run basic tests with Python 3.8
 
-on: [push, pull_request]
+on: [push, pull_request, workflow_dispatch]
 
 jobs:
-  build:
+  tests:
 
     runs-on: ubuntu-latest
 
@@ -20,3 +34,20 @@ jobs:
       - name: Run local tests
         run: |
             make test
+      - name: Run DirectRunner with TF
+        run: |
+            # tf model
+            make run-direct
+            test -f beam-output/beam_test_out.txt && echo "DirectRunner ran successfully!" || $(error "Cannot find beam-output/beam_test_out.txt!")
+      - name: Run DirectRunner with PyTorch
+        run: |
+            # torch model
+            sed -i '/TF_MODEL_URI=/d' .env
+            echo -e "\n" >> .env
+            echo "MODEL_STATE_DICT_PATH=gs://apache-beam-ml/models/torchvision.models.mobilenet_v2.pth" >> .env
+            echo -e "\n" >> .env
+            echo "MODEL_NAME=mobilenet_v2" >> .env
+            make run-direct
+            test -f beam-output/beam_test_out.txt && echo "DirectRunner ran successfully!" || $(error "Cannot find beam-output/beam_test_out.txt!")
+            # restore .env
+            cp tests/sample.env.tf .env

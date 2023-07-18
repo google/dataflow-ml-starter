@@ -19,7 +19,7 @@ VM_NAME=beam-ml-starter-gpu
 ################################################################################
 STAGING_LOCATION=gs://temp-storage-for-perf-tests/loadtests
 TEMP_LOCATION=gs://temp-storage-for-perf-tests/loadtests
-CUSTOM_CONTAINER_IMAGE=us-docker.pkg.dev/apache-beam-testing/xqhu/tf_gpu:test
+CUSTOM_CONTAINER_IMAGE=us-docker.pkg.dev/apache-beam-testing/dataflow-ml-starter/tf_gpu:test
 SERVICE_OPTIONS="worker_accelerator=type:nvidia-tesla-t4;count:1;install-nvidia-driver"
 ################################################################################
 ### DATAFLOW JOB MODEL SETTINGS
@@ -30,4 +30,4 @@ TF_MODEL_URI=https://tfhub.dev/google/tf2-preview/mobilenet_v2/classification/4
 ### DATAFLOW JOB INPUT&OUTPUT SETTINGS
 ################################################################################
 INPUT_DATA="gs://apache-beam-ml/testing/inputs/openimage_50k_benchmark.txt"
-OUTPUT_DATA="gs://temp-storage-for-end-to-end-tests/torch/result_gpu_xqhu.txt"
+OUTPUT_DATA="gs://temp-storage-for-end-to-end-tests/temp-storage-for-end-to-end-tests/dataflow-ml-starter/result_gpu.txt"
