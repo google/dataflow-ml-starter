@@ -18,7 +18,6 @@ on: [push, pull_request, workflow_dispatch]
 
 jobs:
   tests:
-
     runs-on: ubuntu-latest
 
     steps:
@@ -26,28 +25,28 @@ jobs:
       - name: Set up Python 3.8
         uses: actions/setup-python@v4
         with:
-          python-version: '3.8'
+          python-version: "3.8"
       - name: Init env
         run: |
-            cp tests/sample.env.tf .env
-            make init
+          cp tests/sample.env.tf .env
+          make init
       - name: Run local tests
         run: |
-            make test
+          make test
       - name: Run DirectRunner with TF
         run: |
-            # tf model
-            make run-direct
-            test -f beam-output/beam_test_out.txt && echo "DirectRunner ran successfully!" || $(error "Cannot find beam-output/beam_test_out.txt!")
+          # tf model
+          make run-direct
+          test -f beam-output/beam_test_out.txt && echo "DirectRunner ran successfully!" || $(error "Cannot find beam-output/beam_test_out.txt!")
       - name: Run DirectRunner with PyTorch
         run: |
-            # torch model
-            sed -i '/TF_MODEL_URI=/d' .env
-            echo -e "\n" >> .env
-            echo "MODEL_STATE_DICT_PATH=gs://apache-beam-ml/models/torchvision.models.mobilenet_v2.pth" >> .env
-            echo -e "\n" >> .env
-            echo "MODEL_NAME=mobilenet_v2" >> .env
-            make run-direct
-            test -f beam-output/beam_test_out.txt && echo "DirectRunner ran successfully!" || $(error "Cannot find beam-output/beam_test_out.txt!")
-            # restore .env
-            cp tests/sample.env.tf .env
+          # torch model
+          sed -i '/TF_MODEL_URI=/d' .env
+          echo -e "\n" >> .env
+          echo "MODEL_STATE_DICT_PATH=gs://apache-beam-ml/models/torchvision.models.mobilenet_v2.pth" >> .env
+          echo -e "\n" >> .env
+          echo "MODEL_NAME=mobilenet_v2" >> .env
+          make run-direct
+          test -f beam-output/beam_test_out.txt && echo "DirectRunner ran successfully!" || $(error "Cannot find beam-output/beam_test_out.txt!")
+          # restore .env
+          cp tests/sample.env.tf .env
