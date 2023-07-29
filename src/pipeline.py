@@ -134,6 +134,7 @@ def build_pipeline(pipeline, source_config: SourceConfig, sink_config: SinkConfi
         filename_value_pair = (
             pipeline
             | "ReadImageNamesFromPubSub" >> beam.io.ReadFromPubSub(topic=source_config.input)
+            | "Window into fixed intervals" >> beam.WindowInto(beam.window.FixedWindows(60 * 5))
             | "ReadImageData" >> beam.Map(lambda image_name: read_image(image_file_name=image_name))
         )
     else:
