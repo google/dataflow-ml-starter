@@ -13,10 +13,11 @@
 #  limitations under the License.
 
 # standard libraries
+import re
 from enum import Enum
 
 # third party libraries
-from pydantic import BaseModel, Field, root_validator
+from pydantic import BaseModel, Field, root_validator, validator
 
 
 class ModelName(str, Enum):
@@ -51,13 +52,23 @@ class ModelConfig(BaseModel):
         return values
 
 
+def _validate_topic_path(topic_path):
+    pattern = r"projects/.+/topics/.+"
+    return bool(re.match(pattern, topic_path))
+
+
 class SourceConfig(BaseModel):
-    input: str = Field(..., description="the input path to a text file")
+    input: str = Field(..., description="the input path to a text file or a Pub/Sub topic")
     images_dir: str = Field(
         None,
         description="Path to the directory where images are stored."
         "Not required if image names in the input file have absolute path.",
     )
+    streaming: bool = False
+
+    @validator("streaming", pre=True, always=True)
+    def set_streaming(cls, v, values):
+        return _validate_topic_path(values["input"])
 
 
 class SinkConfig(BaseModel):

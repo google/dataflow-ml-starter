@@ -17,7 +17,7 @@
 # standard libraries
 import io
 import os
-from typing import Iterable, Iterator, Optional, Tuple
+from typing import Iterable, Iterator, Optional, Tuple, Union
 
 # third party libraries
 import apache_beam as beam
@@ -45,7 +45,9 @@ def get_model_class(model_name: ModelName) -> nn.Module:
     return model_class
 
 
-def read_image(image_file_name: str, path_to_dir: Optional[str] = None) -> Tuple[str, Image.Image]:
+def read_image(image_file_name: Union[str, bytes], path_to_dir: Optional[str] = None) -> Tuple[str, Image.Image]:
+    if isinstance(image_file_name, bytes):
+        image_file_name = image_file_name.decode()
     if path_to_dir is not None:
         image_file_name = os.path.join(path_to_dir, image_file_name)
     with FileSystems().open(image_file_name, "r") as file:
@@ -126,14 +128,23 @@ def build_pipeline(pipeline, source_config: SourceConfig, sink_config: SinkConfi
     else:
         raise ValueError("Only support PytorchModelHandler and TFModelHandlerTensor!")
 
-    # read the text file and create the pair of input data with the file name and its image
-    filename_value_pair = (
-        pipeline
-        | "ReadImageNames" >> beam.io.ReadFromText(source_config.input)
-        | "FilterEmptyLines" >> beam.ParDo(filter_empty_lines)
-        | "ReadImageData"
-        >> beam.Map(lambda image_name: read_image(image_file_name=image_name, path_to_dir=source_config.images_dir))
-    )
+    if source_config.streaming:
+        # read the text file path from Pub/Sub and use FixedWindows to group these images
+        # and then run the model inference and store the results into GCS
+        filename_value_pair = (
+            pipeline
+            | "ReadImageNamesFromPubSub" >> beam.io.ReadFromPubSub(topic=source_config.input)
+            | "ReadImageData" >> beam.Map(lambda image_name: read_image(image_file_name=image_name))
+        )
+    else:
+        # read the text file and create the pair of input data with the file name and its image
+        filename_value_pair = (
+            pipeline
+            | "ReadImageNames" >> beam.io.ReadFromText(source_config.input)
+            | "FilterEmptyLines" >> beam.ParDo(filter_empty_lines)
+            | "ReadImageData"
+            >> beam.Map(lambda image_name: read_image(image_file_name=image_name, path_to_dir=source_config.images_dir))
+        )
 
     if model_config.model_state_dict_path:
         filename_value_pair = filename_value_pair | "PreprocessImages" >> beam.MapTuple(
@@ -151,7 +162,13 @@ def build_pipeline(pipeline, source_config: SourceConfig, sink_config: SinkConfi
         | "ProcessOutput" >> beam.ParDo(PostProcessor())
     )
 
-    # save the predictions to a text file
-    predictions | "WriteOutputToGCS" >> beam.io.WriteToText(  # pylint: disable=expression-not-assigned
-        sink_config.output, shard_name_template="", append_trailing_newlines=True
-    )
+    # combine all the window results into one text for GCS
+    if source_config.streaming:
+        predictions | "WriteOutputToGCS" >> beam.io.fileio.WriteToFiles(  # pylint: disable=expression-not-assigned
+            sink_config.output, shards=1
+        )
+    else:
+        # save the predictions to a text file
+        predictions | "WriteOutputToGCS" >> beam.io.WriteToText(  # pylint: disable=expression-not-assigned
+            sink_config.output, shard_name_template="", append_trailing_newlines=True
+        )

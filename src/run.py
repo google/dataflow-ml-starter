@@ -64,13 +64,6 @@ def run(argv=None, save_main_session=True, test_pipeline=None) -> PipelineResult
     """
     known_args, pipeline_args = parse_known_args(argv)
 
-    pipeline_options = PipelineOptions(pipeline_args)
-    pipeline_options.view_as(SetupOptions).save_main_session = save_main_session
-
-    pipeline = test_pipeline
-    if not test_pipeline:
-        pipeline = beam.Pipeline(options=pipeline_options)
-
     # setup configs
     model_config = ModelConfig(
         model_state_dict_path=known_args.model_state_dict_path,
@@ -82,6 +75,14 @@ def run(argv=None, save_main_session=True, test_pipeline=None) -> PipelineResult
 
     source_config = SourceConfig(input=known_args.input)
     sink_config = SinkConfig(output=known_args.output)
+
+    # setup pipeline
+    pipeline_options = PipelineOptions(pipeline_args, streaming=source_config.streaming)
+    pipeline_options.view_as(SetupOptions).save_main_session = save_main_session
+
+    pipeline = test_pipeline
+    if not test_pipeline:
+        pipeline = beam.Pipeline(options=pipeline_options)
 
     # build the pipeline using configs
     build_pipeline(pipeline, source_config=source_config, sink_config=sink_config, model_config=model_config)
