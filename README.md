@@ -271,7 +271,7 @@ Note the cost and time depends on your job settings and the regions.
 ### Run the Beam pipeline with the Pub/Sub source
 When `INPUT_DATA` from the `.env` file defines a valid Pub/Sub topic (e.g., `projects/apache-beam-testing/topics/Imagenet_openimage_50k_benchmark`),
 the Beam pipeline is created using the Pub/Sub source with `FixedWindows` and switches to `beam.io.fileio.WriteToFiles` that supports the streaming pipeline.
-We only use `shards=1` here since the incoming Pub/Sub data throughput is low in this example.
+We use `shards=0` here since 0 shards is the recommended approach and Dataflow would decide how many files it should write.
 Note that the streaming job will run forever until it is canceled or drained.
 
 ## FAQ

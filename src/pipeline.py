@@ -165,8 +165,10 @@ def build_pipeline(pipeline, source_config: SourceConfig, sink_config: SinkConfi
 
     # combine all the window results into one text for GCS
     if source_config.streaming:
-        predictions | "WriteOutputToGCS" >> beam.io.fileio.WriteToFiles(  # pylint: disable=expression-not-assigned
-            sink_config.output, shards=1
+        (
+            predictions
+            | "WriteOutputToGCS"
+            >> beam.io.fileio.WriteToFiles(sink_config.output, shards=0)  # pylint: disable=expression-not-assigned
         )
     else:
         # save the predictions to a text file
