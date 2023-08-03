@@ -48,3 +48,10 @@ def test_build_pipeline_with_tf():
 
     p = beam.Pipeline()
     build_pipeline(p, source_config=source_config, sink_config=sink_config, model_config=model_config)
+
+
+def test_source_config_streaming():
+    source_config = SourceConfig(input=str(DATA_FILE_PATH / "openimage_10.txt"))
+    assert source_config.streaming is False
+    source_config = SourceConfig(input="projects/apache-beam-testing/topics/Imagenet_openimage_50k_benchmark")
+    assert source_config.streaming is True

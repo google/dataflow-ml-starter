@@ -119,6 +119,7 @@ ifeq ($(MODEL_ENV), "TORCH")
 	--dataflow_service_option $(SERVICE_OPTIONS) \
 	--number_of_worker_harness_threads 1 \
 	--experiments=disable_worker_container_image_prepull \
+	--experiments=use_pubsub_streaming \
 	--sdk_container_image $(CUSTOM_CONTAINER_IMAGE) \
 	--sdk_location container \
 	--input $(INPUT_DATA) \
@@ -140,6 +141,7 @@ else
 	--dataflow_service_option $(SERVICE_OPTIONS) \
 	--number_of_worker_harness_threads 1 \
 	--experiments=disable_worker_container_image_prepull \
+	--experiments=use_pubsub_streaming \
 	--sdk_container_image $(CUSTOM_CONTAINER_IMAGE) \
 	--sdk_location container \
 	--input $(INPUT_DATA) \
