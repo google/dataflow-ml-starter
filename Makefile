@@ -48,6 +48,10 @@ help: ## Print this help
 	@echo
 	@$(PYTHON) -c "$$PRINT_HELP_PYSCRIPT" < $(MAKEFILE_LIST)
 
+test-rc-env: ## Replace the Beam vesion with the latest RC version
+	$(eval LATEST_VERSION=$(shell ./venv/bin/python3 scripts/get_beam_version.py))
+	@sed 's/BEAM_VERSION=.*/BEAM_VERSION=$(LATEST_VERSION)/g' .env > .env.new && mv .env.new .env
+
 init-venv: ## Create virtual environment in venv folder
 	@$(PYTHON) -m venv venv
 
