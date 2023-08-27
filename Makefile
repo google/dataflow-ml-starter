@@ -50,6 +50,7 @@ help: ## Print this help
 
 test-rc-env: ## Replace the Beam vesion with the latest RC version
 	$(eval LATEST_VERSION=$(shell ./venv/bin/python3 scripts/get_beam_version.py))
+	@echo $(LATEST_VERSION)
 	@sed 's/BEAM_VERSION=.*/BEAM_VERSION=$(LATEST_VERSION)/g' .env > .env.new && mv .env.new .env
 
 init-venv: ## Create virtual environment in venv folder
