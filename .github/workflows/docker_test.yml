@@ -56,6 +56,7 @@ jobs:
       - name: Init env with the test Beam and docker URI
         run: |
           cp tests/sample.env.tf .env
+          make init-venv
           make test-rc-env
           sed -i '/CUSTOM_CONTAINER_IMAGE=/d' .env
           echo -e "\n" >> .env
