@@ -57,7 +57,7 @@ jobs:
         run: |
           cp tests/sample.env.tf .env
           make init-venv
-          ./venv/bin/pip install requests
+          ./venv/bin/pip install requests packaging
           make test-rc-env
           sed -i '/CUSTOM_CONTAINER_IMAGE=/d' .env
           echo -e "\n" >> .env
