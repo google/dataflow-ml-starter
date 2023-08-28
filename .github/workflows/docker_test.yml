@@ -1,0 +1,72 @@
+#  Copyright 2023 Google LLC
+
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+
+#       https://www.apache.org/licenses/LICENSE-2.0
+
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+
+name: Build and push Docker image to GCP Artifact Registry with the latest Beam
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Free Disk Space (Ubuntu)
+        uses: jlumbroso/free-disk-space@main
+        with:
+          # this might remove tools that are actually needed,
+          # if set to "true" but frees about 6 GB
+          tool-cache: false
+
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: false
+          docker-images: true
+          swap-storage: true
+      - name: Checkout
+        uses: actions/checkout@v3
+      - id: "auth"
+        name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v1.1.1
+        with:
+          credentials_json: ${{ secrets.GOOGLE_CREDENTIALS }}
+          token_format: access_token
+      - name: Docker login
+        uses: "docker/login-action@v1"
+        with:
+          registry: "us-docker.pkg.dev"
+          username: "oauth2accesstoken"
+          password: "${{ steps.auth.outputs.access_token }}"
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.8"
+      - name: Init env with the test Beam and docker URI
+        run: |
+          cp tests/sample.env.tf .env
+          make init-venv
+          ./venv/bin/pip install requests packaging
+          make test-latest-env
+          sed -i '/CUSTOM_CONTAINER_IMAGE=/d' .env
+          echo -e "\n" >> .env
+          echo "CUSTOM_CONTAINER_IMAGE=us-docker.pkg.dev/apache-beam-testing/dataflow-ml-starter/tf_gpu:test-beam" >> .env
+          echo '${{ steps.auth.outputs.access_token }}' | docker login -u oauth2accesstoken --password-stdin https://us-docker.pkg.dev
+          make init
+      - name: Build and push Docker image
+        run: |
+          make docker
+      - name: Test Docker image
+        run: |
+          make run-df-gpu
