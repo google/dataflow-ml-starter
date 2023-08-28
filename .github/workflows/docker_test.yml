@@ -58,7 +58,7 @@ jobs:
           cp tests/sample.env.tf .env
           make init-venv
           ./venv/bin/pip install requests packaging
-          make test-rc-env
+          make test-latest-env
           sed -i '/CUSTOM_CONTAINER_IMAGE=/d' .env
           echo -e "\n" >> .env
           echo "CUSTOM_CONTAINER_IMAGE=us-docker.pkg.dev/apache-beam-testing/dataflow-ml-starter/tf_gpu:test-beam" >> .env
