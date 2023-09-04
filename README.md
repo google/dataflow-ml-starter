@@ -58,7 +58,7 @@ newgrp docker
 ### Step 1: Clone this repo and edit .env
 
 ```bash
-git clone https://github.com/liferoad/df-ml-starter.git
+git clone https://github.com/google/dataflow-ml-starter.git
 cd df-ml-starter
 cp .env.template .env
 ```
@@ -271,8 +271,22 @@ Note the cost and time depends on your job settings and the regions.
 ### Run the Beam pipeline with the Pub/Sub source
 When `INPUT_DATA` from the `.env` file defines a valid Pub/Sub topic (e.g., `projects/apache-beam-testing/topics/Imagenet_openimage_50k_benchmark`),
 the Beam pipeline is created using the Pub/Sub source with `FixedWindows` and switches to `beam.io.fileio.WriteToFiles` that supports the streaming pipeline.
-We use `shards=0` here since 0 shards is the recommended approach and Dataflow would decide how many files it should write.
+Note for this toy example, writing the predictions to a GCS bucket is not efficient since the file size is quite small with few bytes.
+In practice, you might tune up [the autoscaling options](https://cloud.google.com/dataflow/docs/guides/troubleshoot-autoscaling) to optimize the streaming pipeline performance.
 Note that the streaming job will run forever until it is canceled or drained.
+
+### Run the Beam pipeline with Dataflow Flex Templates
+If you prefer to package all your code into a custom container and allow users to easily access your Beam pipeline,
+Dataflow Flex Template could be handy to create and run a Flex Template job using Google Cloud CLI or Google Cloud console. (More benefits about templates are [here](https://cloud.google.com/dataflow/docs/concepts/dataflow-templates#benefits).)
+
+Since the custom container is already created, it is straightforward to adapt Dataflow Flex Templates:
+1. create a `metadata.json` file that contains the parameters required by your Beam pipeline. In this example, we can add `input`, `output`, `device`, `model_name`, `model_state_dict_path`, and `tf_model_uri` as the parameters that can be passed in by users. [Here](https://cloud.google.com/dataflow/docs/guides/templates/using-flex-templates#example-metadata-file) is another example metadata file.
+2. convert the custom container to your template container following [this](https://cloud.google.com/dataflow/docs/guides/templates/configuring-flex-templates#use_custom_container_images). `tensorflow_gpu.flex.Dockerfile` is one example converted from `tensorflow_gpu.Dockerfile`. Only two parts are needed: switch to the Dataflow Template launcher entrypoint and package `src` into this container. Change `CUSTOM_CONTAINER_IMAGE` in `.env` and run `make docker` to create the custom container for Flex Templates.
+3. `make create-flex-template` creates a template spec file in a Cloud Storage bucket defined by the env `TEMPLATE_FILE_GCS_PATH` that contains all of the necessary information to run the job, such as the SDK information and metadata. This calls the CLI `gcloud dataflow flex-template build`.
+4. `make run-df-gpu-flex` runs a Flex Template pipeline using the spec file from `TEMPLATE_FILE_GCS_PATH`. This calls the CLI `gcloud dataflow flex-template run`.
+
+More information about Flex Templates can be found [here](https://cloud.google.com/dataflow/docs/guides/templates/using-flex-templates).
+
 
 ## FAQ
 
@@ -329,3 +343,6 @@ exec /opt/apache/beam/boot: no such file or directory
 * https://beam.apache.org/documentation/sdks/python-pipeline-dependencies/
 * https://github.com/apache/beam/blob/master/.test-infra/jenkins/job_InferenceBenchmarkTests_Python.groovy
 * https://cloud.google.com/dataflow/docs/gpu/troubleshoot-gpus#debug-vm
+* https://github.com/GoogleCloudPlatform/python-docs-samples/tree/main/dataflow/flex-templates/streaming_beam
+* https://cloud.google.com/dataflow/docs/guides/templates/using-flex-templates
+* https://cloud.google.com/dataflow/docs/guides/templates/configuring-flex-templates#use_custom_container_images
