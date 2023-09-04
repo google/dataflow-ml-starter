@@ -45,7 +45,7 @@ RUN \
     && pip install --no-cache-dir torch==2.0.0+cu118 torchvision==0.15.1+cu118 torchaudio==2.0.1 --index-url https://download.pytorch.org/whl/cu118
 
 # Copy the run module
-COPY src/ /workspace/
+COPY src/ /workspace/src
 
 #Specifies which Python file to run to launch the Flex Template.
 ENV FLEX_TEMPLATE_PYTHON_PY_FILE="src/run.py"
