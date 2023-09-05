@@ -217,14 +217,7 @@ create-flex-template: ## Create a Flex Template file using a Flex Template custo
 	--temp-location $(TEMP_LOCATION) \
 	--project $(PROJECT_ID) \
 	--worker-region $(REGION) \
-	--worker-machine-type $(MACHINE_TYPE) \
-	--additional-experiments $(SERVICE_OPTIONS) \
-	--additional-experiments disk_size_gb=$(DISK_SIZE_GB) \
-	--additional-experiments number_of_worker_harness_threads=1 \
-	--additional-experiments disable_worker_container_image_prepull \
-	--additional-experiments use_pubsub_streaming \
-	--additional-experiments sdk_container_image=$(CUSTOM_CONTAINER_IMAGE) \
-	--additional-experiments sdk_location=container
+	--worker-machine-type $(MACHINE_TYPE)
 
 run-df-gpu-flex: ## Run a Dataflow job using the Flex Template
 	$(eval JOB_NAME := beam-ml-starter-gpu-flex-$(shell date +%s)-$(shell echo $$$$))
@@ -233,6 +226,12 @@ ifeq ($(MODEL_ENV), "TORCH")
 	--template-file-gcs-location $(TEMPLATE_FILE_GCS_PATH) \
 	--project $(PROJECT_ID) \
 	--region $(REGION) \
+	--worker-machine-type $(MACHINE_TYPE) \
+	--additional-experiments disable_worker_container_image_prepull,use_pubsub_streaming \
+	--parameters number_of_worker_harness_threads=1 \
+	--parameters sdk_location=container \
+	--parameters sdk_container_image=$(CUSTOM_CONTAINER_IMAGE) \
+	--parameters dataflow_service_option=$(SERVICE_OPTIONS) \
 	--parameters input=$(INPUT_DATA) \
 	--parameters output=$(OUTPUT_DATA) \
 	--parameters device=GPU \
@@ -243,6 +242,12 @@ else
 	--template-file-gcs-location $(TEMPLATE_FILE_GCS_PATH) \
 	--project $(PROJECT_ID) \
 	--region $(REGION) \
+	--worker-machine-type $(MACHINE_TYPE) \
+	--additional-experiments disable_worker_container_image_prepull,use_pubsub_streaming \
+	--parameters number_of_worker_harness_threads=1 \
+	--parameters sdk_location=container \
+	--parameters sdk_container_image=$(CUSTOM_CONTAINER_IMAGE) \
+	--parameters dataflow_service_option=$(SERVICE_OPTIONS) \
 	--parameters input=$(INPUT_DATA) \
 	--parameters output=$(OUTPUT_DATA) \
 	--parameters device=GPU \

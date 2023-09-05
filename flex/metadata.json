@@ -35,6 +35,18 @@
         "label": "device to run models",
         "helpText": "device could be either CPU or GPU",
         "isOptional": true
+      },
+      {
+        "name": "disk_size_gb",
+        "label": "disk_size_gb",
+        "helpText": "disk_size_gb for worker",
+        "isOptional": true
+      },
+      {
+        "name": "dataflow_service_option",
+        "label": "dataflow_service_option",
+        "helpText": "dataflow_service_option for worker",
+        "isOptional": true
       }
     ]
   }
