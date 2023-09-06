@@ -46,6 +46,7 @@ RUN \
 
 # Copy the run module
 COPY src/ /workspace/src
+RUN rm -fr /workspace/src/__pycache__
 
 #Specifies which Python file to run to launch the Flex Template.
 ENV FLEX_TEMPLATE_PYTHON_PY_FILE="src/run.py"
@@ -56,5 +57,13 @@ ENV PIP_NO_DEPS=True
 # Copy the Dataflow Template launcher
 COPY --from=template_launcher /opt/google/dataflow/python_template_launcher /opt/google/dataflow/python_template_launcher
 
-# Set the entrypoint to the Dataflow Template launcher.
-ENTRYPOINT ["/opt/google/dataflow/python_template_launcher"]
+# Copy files from official SDK image, including script/dependencies.
+# Note Python 3.8 is used due to the base image from nvidia
+COPY --from=apache/beam_python3.8_sdk:${BEAM_VERSION} /opt/apache/beam /opt/apache/beam
+
+# Set the entrypoint to the Dataflow Template launcher
+# Use this if the launcher image is different with the custom container image
+# ENTRYPOINT ["/opt/google/dataflow/python_template_launcher"]
+
+# Set the entrypoint to Apache Beam SDK launcher.
+ENTRYPOINT ["/opt/apache/beam/boot"]

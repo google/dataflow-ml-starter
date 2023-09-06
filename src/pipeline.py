@@ -32,9 +32,9 @@ from PIL import Image
 from torchvision import models, transforms
 
 try:
-    from config import ModelConfig, ModelName, SinkConfig, SourceConfig
-except ImportError:
     from .config import ModelConfig, ModelName, SinkConfig, SourceConfig
+except ImportError:
+    from config import ModelConfig, ModelName, SinkConfig, SourceConfig
 
 import tensorflow as tf  # isort:skip
 
