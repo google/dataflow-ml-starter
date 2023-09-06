@@ -54,6 +54,8 @@ ENV FLEX_TEMPLATE_PYTHON_PY_FILE="src/run.py"
 # Since we already downloaded all the dependencies, there's no need to rebuild everything.
 ENV PIP_NO_DEPS=True
 
+ENV PYTHONPATH "${PYTHONPATH}:/workspace/src/"
+
 # Copy the Dataflow Template launcher
 COPY --from=template_launcher /opt/google/dataflow/python_template_launcher /opt/google/dataflow/python_template_launcher
 
