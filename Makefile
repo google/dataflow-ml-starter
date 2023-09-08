@@ -227,7 +227,7 @@ ifeq ($(MODEL_ENV), "TORCH")
 	--project $(PROJECT_ID) \
 	--region $(REGION) \
 	--worker-machine-type $(MACHINE_TYPE) \
-	--additional-experiments disable_worker_container_image_prepull,use_pubsub_streaming \
+	--additional-experiments disable_worker_container_image_prepull \
 	--parameters number_of_worker_harness_threads=1 \
 	--parameters sdk_location=container \
 	--parameters sdk_container_image=$(CUSTOM_CONTAINER_IMAGE) \
@@ -243,7 +243,7 @@ else
 	--project $(PROJECT_ID) \
 	--region $(REGION) \
 	--worker-machine-type $(MACHINE_TYPE) \
-	--additional-experiments disable_worker_container_image_prepull,use_pubsub_streaming \
+	--additional-experiments disable_worker_container_image_prepull \
 	--parameters number_of_worker_harness_threads=1 \
 	--parameters sdk_location=container \
 	--parameters sdk_container_image=$(CUSTOM_CONTAINER_IMAGE) \
