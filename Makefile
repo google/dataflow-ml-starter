@@ -222,7 +222,7 @@ create-flex-template: ## Create a Flex Template file using a Flex Template custo
 run-df-gpu-flex: ## Run a Dataflow job using the Flex Template
 	$(eval JOB_NAME := beam-ml-starter-gpu-flex-$(shell date +%s)-$(shell echo $$$$))
 ifeq ($(MODEL_ENV), "TORCH")
-	time gcloud dataflow flex-template run $(JOB_NAME) \
+	gcloud dataflow flex-template run $(JOB_NAME) \
 	--template-file-gcs-location $(TEMPLATE_FILE_GCS_PATH) \
 	--project $(PROJECT_ID) \
 	--region $(REGION) \
@@ -238,7 +238,7 @@ ifeq ($(MODEL_ENV), "TORCH")
 	--parameters model_state_dict_path=$(MODEL_STATE_DICT_PATH) \
 	--parameters model_name=$(MODEL_NAME)
 else
-	time gcloud dataflow flex-template run $(JOB_NAME) \
+	gcloud dataflow flex-template run $(JOB_NAME) \
 	--template-file-gcs-location $(TEMPLATE_FILE_GCS_PATH) \
 	--project $(PROJECT_ID) \
 	--region $(REGION) \
