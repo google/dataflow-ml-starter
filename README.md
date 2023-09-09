@@ -76,7 +76,7 @@ All the useful actions can be triggered using `make`:
 ```console
 $ make
 
-  make targets:
+make targets:
 
      check-beam                Check whether Beam is installed on GPU using VM with Custom Container
      check-pipeline            Check whether the Beam pipeline can run on GPU using VM with Custom Container and DirectRunner
@@ -84,6 +84,7 @@ $ make
      check-torch-gpu           Check whether PyTorch works on GPU using VM with Custom Container
      clean                     Remove virtual environment, downloaded models, etc
      clean-lite                Remove pycache files, pytest files, etc
+     create-flex-template      Create a Flex Template file using a Flex Template custom container
      create-vm                 Create a VM with GPU to test the docker image
      delete-vm                 Delete a VM
      docker                    Build a custom docker image and push it to Artifact Registry
@@ -94,8 +95,10 @@ $ make
      lint                      Run linter on source code
      run-df-cpu                Run a Dataflow job with CPUs and without Custom Container
      run-df-gpu                Run a Dataflow job using the custom container with GPUs
+     run-df-gpu-flex           Run a Dataflow job using the Flex Template
      run-direct                Run a local test with DirectRunner
      test                      Run tests
+     test-latest-env           Replace the Beam vesion with the latest version (including release candidates)
 ```
 
 ### Pipeline Details
@@ -277,11 +280,13 @@ Note that the streaming job will run forever until it is canceled or drained.
 
 ### Run the Beam pipeline with Dataflow Flex Templates
 If you prefer to package all your code into a custom container and allow users to easily access your Beam pipeline,
-Dataflow Flex Template could be handy to create and run a Flex Template job using Google Cloud CLI or Google Cloud console. (More benefits about templates are [here](https://cloud.google.com/dataflow/docs/concepts/dataflow-templates#benefits).)
+Dataflow Flex Template could be handy to create and run a Flex Template job using Google Cloud CLI or Google Cloud console.
+More importantly, building the flex templates container from the custom SDK container image can produce a reproducible launch environment since this ensures the launch and runtime environments will [be compatible with each other](https://beam.apache.org/documentation/sdks/python-pipeline-dependencies/#make-the-launch-environment-compatible-with-the-runtime-environment).
+(More benefits about templates are [here](https://cloud.google.com/dataflow/docs/concepts/dataflow-templates#benefits).)
 
 Since the custom container is already created, it is straightforward to adapt Dataflow Flex Templates:
-1. create a `metadata.json` file that contains the parameters required by your Beam pipeline. In this example, we can add `input`, `output`, `device`, `model_name`, `model_state_dict_path`, and `tf_model_uri` as the parameters that can be passed in by users. [Here](https://cloud.google.com/dataflow/docs/guides/templates/using-flex-templates#example-metadata-file) is another example metadata file.
-2. convert the custom container to your template container following [this](https://cloud.google.com/dataflow/docs/guides/templates/configuring-flex-templates#use_custom_container_images). `tensorflow_gpu.flex.Dockerfile` is one example converted from `tensorflow_gpu.Dockerfile`. Only two parts are needed: switch to the Dataflow Template launcher entrypoint and package `src` into this container. Change `CUSTOM_CONTAINER_IMAGE` in `.env` and run `make docker` to create the custom container for Flex Templates.
+1. create a [`metadata.json`](https://github.com/google/dataflow-ml-starter/blob/main/flex/metadata.json) file that contains the parameters required by your Beam pipeline. In this example, we can add `input`, `output`, `device`, `model_name`, `model_state_dict_path`, and `tf_model_uri` as the parameters that can be passed in by users. [Here](https://cloud.google.com/dataflow/docs/guides/templates/using-flex-templates#example-metadata-file) is another example metadata file.
+2. convert the custom container to your template container following [this](https://cloud.google.com/dataflow/docs/guides/templates/configuring-flex-templates#use_custom_container_images). [`tensorflow_gpu.flex.Dockerfile`](https://github.com/google/dataflow-ml-starter/blob/main/tensorflow_gpu.flex.Dockerfile) is one example converted from `tensorflow_gpu.Dockerfile`. Only two parts are needed: switch to the Dataflow Template launcher entrypoint and package `src` into this container. Change `CUSTOM_CONTAINER_IMAGE` in `.env` and run `make docker` to create the custom container for Flex Templates.
 3. `make create-flex-template` creates a template spec file in a Cloud Storage bucket defined by the env `TEMPLATE_FILE_GCS_PATH` that contains all of the necessary information to run the job, such as the SDK information and metadata. This calls the CLI `gcloud dataflow flex-template build`.
 4. `make run-df-gpu-flex` runs a Flex Template pipeline using the spec file from `TEMPLATE_FILE_GCS_PATH`. This calls the CLI `gcloud dataflow flex-template run`.
 
