@@ -60,7 +60,7 @@ ENV PYTHONPATH "${PYTHONPATH}:/workspace/src/"
 COPY --from=template_launcher /opt/google/dataflow/python_template_launcher /opt/google/dataflow/python_template_launcher
 
 # Copy files from official SDK image, including script/dependencies.
-# Note Python 3.8 is used due to the base image from nvidia
+# Note Python 3.8 is used since the above setup uses Python 3.8.
 COPY --from=apache/beam_python3.8_sdk:${BEAM_VERSION} /opt/apache/beam /opt/apache/beam
 
 # Set the entrypoint to the Dataflow Template launcher
