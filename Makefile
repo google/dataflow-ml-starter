@@ -207,3 +207,49 @@ check-torch-gpu: ## Check whether PyTorch works on GPU using VM with Custom Cont
 
 check-pipeline: ## Check whether the Beam pipeline can run on GPU using VM with Custom Container and DirectRunner
 	@./scripts/check-pipeline.sh
+
+create-flex-template: ## Create a Flex Template file using a Flex Template custom container
+	gcloud dataflow flex-template build $(TEMPLATE_FILE_GCS_PATH) \
+	--image $(CUSTOM_CONTAINER_IMAGE) \
+	--metadata-file ./flex/metadata.json \
+	--sdk-language "PYTHON" \
+	--staging-location $(STAGING_LOCATION) \
+	--temp-location $(TEMP_LOCATION) \
+	--project $(PROJECT_ID) \
+	--worker-region $(REGION) \
+	--worker-machine-type $(MACHINE_TYPE)
+
+run-df-gpu-flex: ## Run a Dataflow job using the Flex Template
+	$(eval JOB_NAME := beam-ml-starter-gpu-flex-$(shell date +%s)-$(shell echo $$$$))
+ifeq ($(MODEL_ENV), "TORCH")
+	gcloud dataflow flex-template run $(JOB_NAME) \
+	--template-file-gcs-location $(TEMPLATE_FILE_GCS_PATH) \
+	--project $(PROJECT_ID) \
+	--region $(REGION) \
+	--worker-machine-type $(MACHINE_TYPE) \
+	--additional-experiments disable_worker_container_image_prepull \
+	--parameters number_of_worker_harness_threads=1 \
+	--parameters sdk_location=container \
+	--parameters sdk_container_image=$(CUSTOM_CONTAINER_IMAGE) \
+	--parameters dataflow_service_option=$(SERVICE_OPTIONS) \
+	--parameters input=$(INPUT_DATA) \
+	--parameters output=$(OUTPUT_DATA) \
+	--parameters device=GPU \
+	--parameters model_state_dict_path=$(MODEL_STATE_DICT_PATH) \
+	--parameters model_name=$(MODEL_NAME)
+else
+	gcloud dataflow flex-template run $(JOB_NAME) \
+	--template-file-gcs-location $(TEMPLATE_FILE_GCS_PATH) \
+	--project $(PROJECT_ID) \
+	--region $(REGION) \
+	--worker-machine-type $(MACHINE_TYPE) \
+	--additional-experiments disable_worker_container_image_prepull \
+	--parameters number_of_worker_harness_threads=1 \
+	--parameters sdk_location=container \
+	--parameters sdk_container_image=$(CUSTOM_CONTAINER_IMAGE) \
+	--parameters dataflow_service_option=$(SERVICE_OPTIONS) \
+	--parameters input=$(INPUT_DATA) \
+	--parameters output=$(OUTPUT_DATA) \
+	--parameters device=GPU \
+	--parameters tf_model_uri=$(TF_MODEL_URI)
+endif

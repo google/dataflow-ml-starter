@@ -1,0 +1,52 @@
+{
+    "name": "Beam RunInference Python flex template",
+    "description": "Beam RunInference example for python flex template.",
+    "parameters": [
+      {
+        "name": "input",
+        "label": "Input data",
+        "helpText": "Input image URI data that could be a GCS bucket or pub/sub topic"
+      },
+      {
+        "name": "output",
+        "label": "Output GCS bucket path",
+        "helpText": "A GCS bucket that stores the model predictions"
+      },
+      {
+        "name": "tf_model_uri",
+        "label": "TensorFlow model URI",
+        "helpText": "A valid TensorFlow model URI",
+        "isOptional": true
+      },
+      {
+        "name": "model_name",
+        "label": "a Pytorch model name",
+        "helpText": "A model name, e.g. resnet101",
+        "isOptional": true
+      },
+      {
+        "name": "model_state_dict_path",
+        "label": "a Pytorch model state path",
+        "helpText": "Path to the model's state_dict",
+        "isOptional": true
+      },
+      {
+        "name": "device",
+        "label": "device to run models",
+        "helpText": "device could be either CPU or GPU",
+        "isOptional": true
+      },
+      {
+        "name": "disk_size_gb",
+        "label": "disk_size_gb",
+        "helpText": "disk_size_gb for worker",
+        "isOptional": true
+      },
+      {
+        "name": "dataflow_service_option",
+        "label": "dataflow_service_option",
+        "helpText": "dataflow_service_option for worker",
+        "isOptional": true
+      }
+    ]
+  }

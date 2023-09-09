@@ -23,8 +23,12 @@ import apache_beam as beam
 from apache_beam.options.pipeline_options import PipelineOptions, SetupOptions
 from apache_beam.runners.runner import PipelineResult
 
-from .config import ModelConfig, SinkConfig, SourceConfig
-from .pipeline import build_pipeline
+try:
+    from .config import ModelConfig, SinkConfig, SourceConfig
+    from .pipeline import build_pipeline
+except ImportError:
+    from config import ModelConfig, SinkConfig, SourceConfig
+    from pipeline import build_pipeline
 
 
 def parse_known_args(argv):

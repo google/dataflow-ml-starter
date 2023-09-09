@@ -31,7 +31,10 @@ from apache_beam.ml.inference.tensorflow_inference import TFModelHandlerTensor
 from PIL import Image
 from torchvision import models, transforms
 
-from .config import ModelConfig, ModelName, SinkConfig, SourceConfig
+try:
+    from .config import ModelConfig, ModelName, SinkConfig, SourceConfig
+except ImportError:
+    from config import ModelConfig, ModelName, SinkConfig, SourceConfig
 
 import tensorflow as tf  # isort:skip
 
