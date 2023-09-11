@@ -281,7 +281,7 @@ Note that the streaming job will run forever until it is canceled or drained.
 ### Run the Beam pipeline with Dataflow Flex Templates
 If you prefer to package all your code into a custom container and allow users to easily access your Beam pipeline,
 Dataflow Flex Template could be handy to create and run a Flex Template job using Google Cloud CLI or Google Cloud console.
-More importantly, building the flex templates container from the custom SDK container image can produce a reproducible launch environment since this ensures the launch and runtime environments will [be compatible with each other](https://beam.apache.org/documentation/sdks/python-pipeline-dependencies/#make-the-launch-environment-compatible-with-the-runtime-environment).
+More importantly, building the flex templates container from the custom SDK container image can produce a reproducible launch environment that is [compatible with the runtime environment](https://beam.apache.org/documentation/sdks/python-pipeline-dependencies/#make-the-launch-environment-compatible-with-the-runtime-environment).
 (More benefits about templates are [here](https://cloud.google.com/dataflow/docs/concepts/dataflow-templates#benefits).)
 
 Since the custom container is already created, it is straightforward to adapt Dataflow Flex Templates:
