@@ -20,8 +20,8 @@ import apache_beam as beam
 
 # Dataflow ML libraries
 # dfml libraries
-from src.config import ModelConfig, SinkConfig, SourceConfig
-from src.pipeline import build_pipeline
+from my_project.config import ModelConfig, SinkConfig, SourceConfig
+from my_project.pipeline import build_pipeline
 
 DATA_FILE_PATH = Path(__file__).parent.parent / "data"
 

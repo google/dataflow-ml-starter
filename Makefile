@@ -17,6 +17,7 @@ SILENT:
 .DEFAULT_GOAL := help
 
 # Load environment variables from .env file
+TF_MODEL_URI :=
 include .env
 export
 
@@ -64,6 +65,7 @@ init: init-venv ## Init virtual environment
 	@./venv/bin/python3 -m pre_commit install --install-hooks --overwrite
 	@mkdir -p beam-output
 	@echo "use 'source venv/bin/activate' to activate venv "
+	@./venv/bin/python3 -m pip install -e .
 
 format: ## Run formatter on source code
 	@./venv/bin/python3 -m black --config=pyproject.toml .
@@ -85,18 +87,18 @@ clean: clean-lite ## Remove virtual environment, downloaded models, etc
 	@echo "run 'make init'"
 
 test: lint ## Run tests
-	@PYTHONPATH="./:./src" ./venv/bin/pytest -s -vv --cov=src --cov-fail-under=50 tests/
+	./venv/bin/pytest -s -vv --cov=my_project --cov-fail-under=50 tests/
 
 run-direct: ## Run a local test with DirectRunner
 	@rm -f beam-output/beam_test_out.txt
 ifeq ($(MODEL_ENV), "TORCH")
-	time ./venv/bin/python3 -m src.run \
+	time ./venv/bin/python3 -m my_project.run \
 	--input data/openimage_10.txt \
 	--output beam-output/beam_test_out.txt \
 	--model_state_dict_path $(MODEL_STATE_DICT_PATH) \
 	--model_name $(MODEL_NAME)
 else
-	time ./venv/bin/python3 -m src.run \
+	time ./venv/bin/python3 -m my_project.run \
 	--input data/openimage_10.txt \
 	--output beam-output/beam_test_out.txt \
 	--tf_model_uri $(TF_MODEL_URI)
@@ -110,7 +112,7 @@ docker: ## Build a custom docker image and push it to Artifact Registry
 run-df-gpu: ## Run a Dataflow job using the custom container with GPUs
 	$(eval JOB_NAME := beam-ml-starter-gpu-$(shell date +%s)-$(shell echo $$$$))
 ifeq ($(MODEL_ENV), "TORCH")
-	time ./venv/bin/python3 -m src.run \
+	time ./venv/bin/python3 -m my_project.run \
 	--runner DataflowRunner \
 	--job_name $(JOB_NAME) \
 	--project $(PROJECT_ID) \
@@ -132,7 +134,7 @@ ifeq ($(MODEL_ENV), "TORCH")
 	--model_state_dict_path  $(MODEL_STATE_DICT_PATH) \
 	--model_name $(MODEL_NAME)
 else
-	time ./venv/bin/python3 -m src.run \
+	time ./venv/bin/python3 -m my_project.run \
 	--runner DataflowRunner \
 	--job_name $(JOB_NAME) \
 	--project $(PROJECT_ID) \
@@ -158,7 +160,7 @@ run-df-cpu: ## Run a Dataflow job with CPUs and without Custom Container
 	@$(shell sed "s|\$${BEAM_VERSION}|$(BEAM_VERSION)|g" requirements.txt > beam-output/requirements.txt)
 	@$(eval JOB_NAME := beam-ml-starter-cpu-$(shell date +%s)-$(shell echo $$$$))
 ifeq ($(MODEL_ENV), "TORCH")
-	time ./venv/bin/python3 -m src.run \
+	time ./venv/bin/python3 -m my_project.run \
 	--runner DataflowRunner \
 	--job_name $(JOB_NAME) \
 	--project $(PROJECT_ID) \
@@ -174,7 +176,7 @@ ifeq ($(MODEL_ENV), "TORCH")
 	--model_state_dict_path  $(MODEL_STATE_DICT_PATH) \
 	--model_name $(MODEL_NAME)
 else
-	time ./venv/bin/python3 -m src.run \
+	time ./venv/bin/python3 -m my_project.run \
 	--runner DataflowRunner \
 	--job_name $(JOB_NAME) \
 	--project $(PROJECT_ID) \

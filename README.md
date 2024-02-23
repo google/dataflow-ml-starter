@@ -41,8 +41,8 @@ newgrp docker
 ├── requirements.prod.txt   <- Packages for the production environment and produces `requirements.txt`
 ├── scripts                 <- utility bash scripts
 ├── setup.py                <- Used in `python setup.py sdist` to create the multi-file python package
-├── src                     <- Source code for use in this project
-│   ├── __init__.py         <- Makes src a Python module
+├── my_project              <- Source code for use in this project, also your python package module name
+│   ├── __init__.py         <- Makes my_project a Python module
 │   ├── config.py           <- `pydantic` model classes to define sources, sinks, and models
 │   ├── pipeline.py         <- Builds the Beam RunInference pipeline
 │   └── run.py              <- A run module to parse the command options and run the Beam pipeline
@@ -118,10 +118,10 @@ The entire code flows in this way:
 * `run.py` is called by the`Makefile` targets to parse the input arguments and set `ModelConfig`, `SourceConfig`, and `SinkConfig` defined in `config.py`, then calls `build_pipeline` from `pipeline.py` to build the final Beam pipeline
 
 
-To customize the pipeline, modify `build_pipeline` in [pipeline.py](https://github.com/google/dataflow-ml-starter/blob/main/src/pipeline.py). It defines how to read the image data from TextIO, pre-process the images, score them, post-process the predictions,
+To customize the pipeline, modify `build_pipeline` in [pipeline.py](https://github.com/google/dataflow-ml-starter/blob/main/my_project/pipeline.py). It defines how to read the image data from TextIO, pre-process the images, score them, post-process the predictions,
 and at last save the results using TextIO.
 
-[config.py](https://github.com/google/dataflow-ml-starter/blob/main/src/config.py) contains a set of `pydantic` models to specify the configurations for sources, sinks, and models and validate them. Users can easily add more Pytorch classification models. [Here](https://github.com/apache/beam/tree/master/sdks/python/apache_beam/examples/inference) contains more examples.
+[config.py](https://github.com/google/dataflow-ml-starter/blob/main/my_project/config.py) contains a set of `pydantic` models to specify the configurations for sources, sinks, and models and validate them. Users can easily add more Pytorch classification models. [Here](https://github.com/apache/beam/tree/master/sdks/python/apache_beam/examples/inference) contains more examples.
 
 ### `.env` Details
 
@@ -286,7 +286,7 @@ More importantly, building the flex templates container from the custom SDK cont
 
 Since the custom container is already created, it is straightforward to adapt Dataflow Flex Templates:
 1. create a [`metadata.json`](https://github.com/google/dataflow-ml-starter/blob/main/flex/metadata.json) file that contains the parameters required by your Beam pipeline. In this example, we can add `input`, `output`, `device`, `model_name`, `model_state_dict_path`, and `tf_model_uri` as the parameters that can be passed in by users. [Here](https://cloud.google.com/dataflow/docs/guides/templates/using-flex-templates#example-metadata-file) is another example metadata file.
-2. convert the custom container to your template container following [this](https://cloud.google.com/dataflow/docs/guides/templates/configuring-flex-templates#use_custom_container_images). [`tensorflow_gpu.flex.Dockerfile`](https://github.com/google/dataflow-ml-starter/blob/main/tensorflow_gpu.flex.Dockerfile) is one example converted from `tensorflow_gpu.Dockerfile`. Only two parts are needed: switch to the Dataflow Template launcher entrypoint and package `src` into this container. Change `CUSTOM_CONTAINER_IMAGE` in `.env` and run `make docker` to create the custom container for Flex Templates.
+2. convert the custom container to your template container following [this](https://cloud.google.com/dataflow/docs/guides/templates/configuring-flex-templates#use_custom_container_images). [`tensorflow_gpu.flex.Dockerfile`](https://github.com/google/dataflow-ml-starter/blob/main/tensorflow_gpu.flex.Dockerfile) is one example converted from `tensorflow_gpu.Dockerfile`. Only two parts are needed: switch to the Dataflow Template launcher entrypoint and package `my_project` into this container. Change `CUSTOM_CONTAINER_IMAGE` in `.env` and run `make docker` to create the custom container for Flex Templates.
 3. `make create-flex-template` creates a template spec file in a Cloud Storage bucket defined by the env `TEMPLATE_FILE_GCS_PATH` that contains all of the necessary information to run the job, such as the SDK information and metadata. This calls the CLI `gcloud dataflow flex-template build`.
 4. `make run-df-gpu-flex` runs a Flex Template pipeline using the spec file from `TEMPLATE_FILE_GCS_PATH`. This calls the CLI `gcloud dataflow flex-template run`.
 

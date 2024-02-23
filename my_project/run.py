@@ -23,12 +23,9 @@ import apache_beam as beam
 from apache_beam.options.pipeline_options import PipelineOptions, SetupOptions
 from apache_beam.runners.runner import PipelineResult
 
-try:
-    from .config import ModelConfig, SinkConfig, SourceConfig
-    from .pipeline import build_pipeline
-except ImportError:
-    from config import ModelConfig, SinkConfig, SourceConfig
-    from pipeline import build_pipeline
+# Dataflow ML libraries
+from my_project.config import ModelConfig, SinkConfig, SourceConfig
+from my_project.pipeline import build_pipeline
 
 
 def parse_known_args(argv):
