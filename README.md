@@ -42,7 +42,7 @@ newgrp docker
 ├── scripts                 <- utility bash scripts
 ├── setup.py                <- Used in `python setup.py sdist` to create the multi-file python package
 ├── my_project              <- Source code for use in this project, also your python package module name
-│   ├── __init__.py         <- Makes my_project a Python module
+│   ├── __init__.py         <- Makes my_project a Python package
 │   ├── config.py           <- `pydantic` model classes to define sources, sinks, and models
 │   ├── pipeline.py         <- Builds the Beam RunInference pipeline
 │   └── run.py              <- A run module to parse the command options and run the Beam pipeline
