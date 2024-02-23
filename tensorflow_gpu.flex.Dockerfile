@@ -45,16 +45,16 @@ RUN \
     && pip install --no-cache-dir torch==2.0.0+cu118 torchvision==0.15.1+cu118 torchaudio==2.0.1 --index-url https://download.pytorch.org/whl/cu118
 
 # Copy the run module
-COPY src/ /workspace/src
-RUN rm -fr /workspace/src/__pycache__
+COPY my_project/ /workspace/my_project
+RUN rm -fr /workspace/my_project/__pycache__
 
 #Specifies which Python file to run to launch the Flex Template.
-ENV FLEX_TEMPLATE_PYTHON_PY_FILE="src/run.py"
+ENV FLEX_TEMPLATE_PYTHON_PY_FILE="my_project/run.py"
 
 # Since we already downloaded all the dependencies, there's no need to rebuild everything.
 ENV PIP_NO_DEPS=True
 
-ENV PYTHONPATH "${PYTHONPATH}:/workspace/src/"
+ENV PYTHONPATH "${PYTHONPATH}:/workspace/my_project/"
 
 # Copy the Dataflow Template launcher
 COPY --from=template_launcher /opt/google/dataflow/python_template_launcher /opt/google/dataflow/python_template_launcher

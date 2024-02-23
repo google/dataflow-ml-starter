@@ -24,8 +24,8 @@ if os.path.exists("requirements.txt"):
         required = f.read().splitlines()
 
 setuptools.setup(
-    name="src",
+    name="my_project",
     version="0.0.1",
     install_requires=required,
-    packages=["src"],
+    packages=["my_project"],
 )

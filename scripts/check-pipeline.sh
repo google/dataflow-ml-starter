@@ -42,7 +42,7 @@ vm_ssh="gcloud compute ssh --strict-host-key-checking=no $VM_NAME --project $PRO
 vm_scp="gcloud compute scp --strict-host-key-checking=no --project $PROJECT_ID --zone=$ZONE --quiet"
 
 # Package the local code and copy it to VM
-PACKAGE_NAME="src-0.0.1"
+PACKAGE_NAME="my_project-0.0.1"
 python3 setup.py sdist
 $vm_ssh "sudo rm -fr ~/*"
 $vm_scp dist/$PACKAGE_NAME.tar.gz data/openimage_10.txt $VM_NAME:~/
@@ -54,13 +54,13 @@ echo "Running the PyTorch model on GPU..."
 $vm_ssh "docker run --entrypoint /bin/bash \
 --volume /var/lib/nvidia/lib64:/usr/local/nvidia/lib64   --volume /var/lib/nvidia/bin:/usr/local/nvidia/bin \
 --volume /home/\$USER/:/workspace/\$USER --privileged $CUSTOM_CONTAINER_IMAGE -c \
-\"cd \$USER/$PACKAGE_NAME; python -m src.run --input openimage_10.txt  --output beam-output/beam_test_out.txt  --model_state_dict_path  $MODEL_STATE_DICT_PATH --model_name $MODEL_NAME --device GPU\""
+\"cd \$USER/$PACKAGE_NAME; python -m my_project.run --input openimage_10.txt  --output beam-output/beam_test_out.txt  --model_state_dict_path  $MODEL_STATE_DICT_PATH --model_name $MODEL_NAME --device GPU\""
 else
 echo "Running the Tensorflow model on GPU..."
 $vm_ssh "docker run --entrypoint /bin/bash \
 --volume /var/lib/nvidia/lib64:/usr/local/nvidia/lib64   --volume /var/lib/nvidia/bin:/usr/local/nvidia/bin \
 --volume /home/\$USER/:/workspace/\$USER --privileged $CUSTOM_CONTAINER_IMAGE -c \
-\"cd \$USER/$PACKAGE_NAME; python -m src.run --input openimage_10.txt  --output beam-output/beam_test_out.txt  --tf_model_uri $TF_MODEL_URI --device GPU\""
+\"cd \$USER/$PACKAGE_NAME; python -m my_project.run --input openimage_10.txt  --output beam-output/beam_test_out.txt  --tf_model_uri $TF_MODEL_URI --device GPU\""
 fi
 
 $vm_ssh "[ -f './$PACKAGE_NAME/beam-output/beam_test_out.txt' ] && echo 'The DirectRunner run succeeded on GPU!' || echo 'The DirectRunner run failed on GPU!'"
