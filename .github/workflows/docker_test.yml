@@ -55,7 +55,7 @@ jobs:
           python-version: "3.10"
       - name: Init env with the test Beam and docker URI
         run: |
-          cp tests/sample.env.tf .env
+          cp tests/sample.env.pytorch .env
           make init-venv
           ./venv/bin/pip install requests packaging
           make test-latest-env
