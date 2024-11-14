@@ -49,10 +49,10 @@ jobs:
           registry: "us-docker.pkg.dev"
           username: "oauth2accesstoken"
           password: "${{ steps.auth.outputs.access_token }}"
-      - name: Set up Python 3.8
+      - name: Set up Python 3.10
         uses: actions/setup-python@v4
         with:
-          python-version: "3.8"
+          python-version: "3.10"
       - name: Init env with the test Beam and docker URI
         run: |
           cp tests/sample.env.tf .env
@@ -61,7 +61,7 @@ jobs:
           make test-latest-env
           sed -i '/CUSTOM_CONTAINER_IMAGE=/d' .env
           echo -e "\n" >> .env
-          echo "CUSTOM_CONTAINER_IMAGE=us-docker.pkg.dev/apache-beam-testing/dataflow-ml-starter/tf_gpu:test-beam" >> .env
+          echo "CUSTOM_CONTAINER_IMAGE=us-docker.pkg.dev/apache-beam-testing/dataflow-ml-starter/pytorch_gpu:test-beam" >> .env
           echo '${{ steps.auth.outputs.access_token }}' | docker login -u oauth2accesstoken --password-stdin https://us-docker.pkg.dev
           make init
       - name: Build and push Docker image
