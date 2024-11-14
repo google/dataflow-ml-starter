@@ -19,3 +19,4 @@ torchvision>=0.8.2
 pillow>=8.0.0
 tensorflow
 tensorflow_hub
+numpy<2.0.0
