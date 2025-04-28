@@ -36,7 +36,7 @@ RUN \
         python3-distutils \
     && rm -rf /var/lib/apt/lists/* \
     && update-alternatives --install /usr/bin/python python /usr/bin/python3.8 10 \
-    && curl https://bootstrap.pypa.io/get-pip.py | python \
+    && curl https://bootstrap.pypa.io/pip/3.8/get-pip.py | python \
     && pip install --upgrade pip \
     && pip install --no-cache-dir -r requirements.txt \
     && pip install --no-cache-dir tensorflow==2.12.1 \
