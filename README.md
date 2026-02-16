@@ -66,7 +66,7 @@ Use your editor to fill in the information in the `.env` file.
 
 If you want to try other pytorch models under `gs://apache-beam-ml/models/`,
 ```bash
-gsutil ls gs://apache-beam-ml/models/
+gcloud storage ls gs://apache-beam-ml/models/
 ```
 you need to edit `config.py` to add more model names.
 
